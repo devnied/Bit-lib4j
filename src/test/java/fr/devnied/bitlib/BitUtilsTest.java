@@ -29,10 +29,10 @@ public final class BitUtilsTest {
 		BitUtils bit = new BitUtils(test);
 
 		Assertions.assertThat(bit.getCurrentBitIndex()).isEqualTo(0);
-		Assertions.assertThat(bit.getNextInt(4)).isEqualTo(1);
+		Assertions.assertThat(bit.getNextInteger(4)).isEqualTo(1);
 		Assertions.assertThat(bit.getCurrentBitIndex()).isEqualTo(4);
 		bit.setCurrentBitIndex(5);
-		Assertions.assertThat(bit.getNextInt(3)).isEqualTo(1);
+		Assertions.assertThat(bit.getNextInteger(3)).isEqualTo(1);
 
 	}
 
@@ -93,22 +93,22 @@ public final class BitUtilsTest {
 
 		BitUtils bit = new BitUtils(test);
 
-		Assertions.assertThat(bit.getNextInt(4)).isEqualTo(1);
-		Assertions.assertThat(bit.getNextInt(20)).isEqualTo(65536);
-		Assertions.assertThat(bit.getNextInt(1)).isEqualTo(0);
-		Assertions.assertThat(bit.getNextInt(4)).isEqualTo(12);
-		Assertions.assertThat(bit.getNextInt(1)).isEqualTo(1);
-		Assertions.assertThat(bit.getNextInt(4)).isEqualTo(15);
-		Assertions.assertThat(bit.getNextInt(1)).isEqualTo(1);
-		Assertions.assertThat(bit.getNextInt(5)).isEqualTo(15);
+		Assertions.assertThat(bit.getNextInteger(4)).isEqualTo(1);
+		Assertions.assertThat(bit.getNextInteger(20)).isEqualTo(65536);
+		Assertions.assertThat(bit.getNextInteger(1)).isEqualTo(0);
+		Assertions.assertThat(bit.getNextInteger(4)).isEqualTo(12);
+		Assertions.assertThat(bit.getNextInteger(1)).isEqualTo(1);
+		Assertions.assertThat(bit.getNextInteger(4)).isEqualTo(15);
+		Assertions.assertThat(bit.getNextInteger(1)).isEqualTo(1);
+		Assertions.assertThat(bit.getNextInteger(5)).isEqualTo(15);
 
 		BitUtils bit2 = new BitUtils(new byte[] { (byte) 0x04, (byte) 0x21, 0x60 });
-		Assertions.assertThat(bit2.getNextInt(2)).isEqualTo(0);
-		Assertions.assertThat(bit2.getNextInt(14)).isEqualTo(1057);
-		Assertions.assertThat(bit2.getNextInt(1)).isEqualTo(0);
-		Assertions.assertThat(bit2.getNextInt(1)).isEqualTo(1);
-		Assertions.assertThat(bit2.getNextInt(1)).isEqualTo(1);
-		Assertions.assertThat(bit2.getNextInt(1)).isEqualTo(0);
+		Assertions.assertThat(bit2.getNextInteger(2)).isEqualTo(0);
+		Assertions.assertThat(bit2.getNextInteger(14)).isEqualTo(1057);
+		Assertions.assertThat(bit2.getNextInteger(1)).isEqualTo(0);
+		Assertions.assertThat(bit2.getNextInteger(1)).isEqualTo(1);
+		Assertions.assertThat(bit2.getNextInteger(1)).isEqualTo(1);
+		Assertions.assertThat(bit2.getNextInteger(1)).isEqualTo(0);
 	}
 
 	/**
@@ -182,13 +182,13 @@ public final class BitUtilsTest {
 		bit3.setNextInteger(7, 3);
 		bit3.reset();
 
-		Assertions.assertThat(bit3.getNextInt(6)).isEqualTo(10);
-		Assertions.assertThat(bit3.getNextInt(12)).isEqualTo(23);
-		Assertions.assertThat(bit3.getNextInt(8)).isEqualTo(5);
-		Assertions.assertThat(bit3.getNextInt(16)).isEqualTo(930);
-		Assertions.assertThat(bit3.getNextInt(3)).isEqualTo(5);
-		Assertions.assertThat(bit3.getNextInt(8)).isEqualTo(159);
-		Assertions.assertThat(bit3.getNextInt(3)).isEqualTo(7);
+		Assertions.assertThat(bit3.getNextInteger(6)).isEqualTo(10);
+		Assertions.assertThat(bit3.getNextInteger(12)).isEqualTo(23);
+		Assertions.assertThat(bit3.getNextInteger(8)).isEqualTo(5);
+		Assertions.assertThat(bit3.getNextInteger(16)).isEqualTo(930);
+		Assertions.assertThat(bit3.getNextInteger(3)).isEqualTo(5);
+		Assertions.assertThat(bit3.getNextInteger(8)).isEqualTo(159);
+		Assertions.assertThat(bit3.getNextInteger(3)).isEqualTo(7);
 
 		BitUtils bit2 = new BitUtils(128);
 		bit2.setNextInteger(3, 2);
@@ -200,12 +200,12 @@ public final class BitUtilsTest {
 
 		bit2.reset();
 
-		Assertions.assertThat(bit2.getNextInt(2)).isEqualTo(3);
-		Assertions.assertThat(bit2.getNextInt(14)).isEqualTo(1057);
-		Assertions.assertThat(bit2.getNextInt(1)).isEqualTo(1);
-		Assertions.assertThat(bit2.getNextInt(15)).isEqualTo(1532);
-		Assertions.assertThat(bit2.getNextInt(8)).isEqualTo(8);
-		Assertions.assertThat(bit2.getNextInt(15)).isEqualTo(1532);
+		Assertions.assertThat(bit2.getNextInteger(2)).isEqualTo(3);
+		Assertions.assertThat(bit2.getNextInteger(14)).isEqualTo(1057);
+		Assertions.assertThat(bit2.getNextInteger(1)).isEqualTo(1);
+		Assertions.assertThat(bit2.getNextInteger(15)).isEqualTo(1532);
+		Assertions.assertThat(bit2.getNextInteger(8)).isEqualTo(8);
+		Assertions.assertThat(bit2.getNextInteger(15)).isEqualTo(1532);
 
 		BitUtils bit = new BitUtils(64);
 		bit.setNextInteger(3, 2);
@@ -219,15 +219,15 @@ public final class BitUtilsTest {
 		bit.setNextInteger(1, 1);
 		bit.reset();
 
-		Assertions.assertThat(bit.getNextInt(2)).isEqualTo(3);
-		Assertions.assertThat(bit.getNextInt(8)).isEqualTo(255);
-		Assertions.assertThat(bit.getNextInt(2)).isEqualTo(0);
-		Assertions.assertThat(bit.getNextInt(4)).isEqualTo(15);
-		Assertions.assertThat(bit.getNextInt(2)).isEqualTo(2);
-		Assertions.assertThat(bit.getNextInt(3)).isEqualTo(3);
-		Assertions.assertThat(bit.getNextInt(1)).isEqualTo(1);
-		Assertions.assertThat(bit.getNextInt(1)).isEqualTo(0);
-		Assertions.assertThat(bit.getNextInt(1)).isEqualTo(1);
+		Assertions.assertThat(bit.getNextInteger(2)).isEqualTo(3);
+		Assertions.assertThat(bit.getNextInteger(8)).isEqualTo(255);
+		Assertions.assertThat(bit.getNextInteger(2)).isEqualTo(0);
+		Assertions.assertThat(bit.getNextInteger(4)).isEqualTo(15);
+		Assertions.assertThat(bit.getNextInteger(2)).isEqualTo(2);
+		Assertions.assertThat(bit.getNextInteger(3)).isEqualTo(3);
+		Assertions.assertThat(bit.getNextInteger(1)).isEqualTo(1);
+		Assertions.assertThat(bit.getNextInteger(1)).isEqualTo(0);
+		Assertions.assertThat(bit.getNextInteger(1)).isEqualTo(1);
 	}
 
 	/**
@@ -303,11 +303,11 @@ public final class BitUtilsTest {
 		bit.setNextString(text2);
 		bit.reset();
 
-		Assertions.assertThat(bit.getNextInt(5)).isEqualTo(3);
+		Assertions.assertThat(bit.getNextInteger(5)).isEqualTo(3);
 		Assertions.assertThat(bit.getNextString(text1.length() * 8)).isEqualTo(text1);
 		Assertions.assertThat(bit.getNextString(text2.length() * 8)).isEqualTo(text2);
 		bit.reset();
-		Assertions.assertThat(bit.getNextInt(5)).isEqualTo(3);
+		Assertions.assertThat(bit.getNextInteger(5)).isEqualTo(3);
 		Assertions.assertThat(bit.getNextString((text1.length() + text2.length()) * 8)).isEqualTo(text1 + text2);
 	}
 

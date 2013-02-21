@@ -127,7 +127,7 @@ public final class BitUtils {
 	 */
 	public boolean getNextBoolean() {
 		boolean ret = false;
-		if (getNextInt(1) == 1) {
+		if (getNextInteger(1) == 1) {
 			ret = true;
 		}
 		return ret;
@@ -209,7 +209,7 @@ public final class BitUtils {
 	 *            the length of the data to read in bit
 	 * @return an integer
 	 */
-	public int getNextInt(final int pLenght) {
+	public int getNextInteger(final int pLenght) {
 		// allocate Size of Integer
 		ByteBuffer buffer = ByteBuffer.allocate(INTEGER_BYTE_SIZE);
 		// final value
