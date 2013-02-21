@@ -10,19 +10,22 @@ It is very easy to get started with bit-lib4j:
 
 * Read data from byte tab
 
+```java
 	byte[] array = new byte[]{0x12,0x25}
 	BitUtils bit = new BitUtils(array);
 	int res = bit.getNextInteger(4);      // read the first 4 bits to an integer
+```
 
 * Create byte tab with bit
 
+```java
 	BitUtils bit = new BitUtils(8);
 	bit.setNextInteger(3,3);			  // set and integer on 3 bits
 	bit.setNextInteger(1,5);		      // set one value on 4 bits
 	
 	// Result
 	bit.getData();                        // return Ox61  (0110 0001b)
-	
+```
 
 ## Author
 
