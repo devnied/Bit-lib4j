@@ -36,6 +36,10 @@ If you are not using Maven or some other dependency management tool that can und
 **Runtime Dependencies**
 * slf4j-api 1.6.6
 
+## Bugs
+
+Please report bugs and feature requests to the GitHub issue tracker.<br/>
+Forks and Pull Requests are also welcome.
 
 ## Author
 
