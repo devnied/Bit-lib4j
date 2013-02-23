@@ -2,7 +2,6 @@ Bit-lib4j [![build status](https://secure.travis-ci.org/devnied/Bit-lib4j.png)](
 ========
 
 Bit-Lib4j is an useful library to manipulate bits in Java.
-
 With this library you can read/write data in a byte array with a custom size for Java primitive types.
 
 ##Simple API
