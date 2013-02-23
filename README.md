@@ -1,7 +1,7 @@
-Bit-lib4J
+Bit-lib4j [![build status](https://secure.travis-ci.org/devnied/Bit-lib4j.png)](http://travis-ci.org/devnied/Bit-lib4j)
 ========
 
-Bit-Lib4J is an useful library to manipulate bits in Java.
+Bit-Lib4j is an useful library to manipulate bits in Java.
 
 With this library you can read/write data in a byte array with a custom size for Java primitive types.
 
@@ -34,7 +34,6 @@ If you are not using Maven or some other dependency management tool that can und
 
 **Runtime Dependencies**
 * slf4j-api 1.6.6
-
 
 
 ## Author
