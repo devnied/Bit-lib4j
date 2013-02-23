@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fr.devnied</groupId>
 	<artifactId>bit-lib4j</artifactId>
 	<packaging>jar</packaging>
-	<version>0.1-SNAPSHOT</version>
+	<version>1.0</version>
 	<name>bit-lib4j</name>
 	
 	<inceptionYear>2013</inceptionYear>
@@ -28,7 +27,8 @@
     	<connection>scm:git:git@github.com:devnied/Bit-lib4j.git</connection>
     	<developerConnection>scm:git:git@github.com:devnied/Bit-lib4j.git</developerConnection>
     	<url>scm:git:git@github.com:devnied/Bit-lib4j.git</url>
-	</scm>
+	  <tag>bit-lib4j-1.0</tag>
+  </scm>
 
   
 	<properties>
