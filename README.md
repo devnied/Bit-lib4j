@@ -9,7 +9,7 @@ With this library you can read/write data in a byte array with a custom size for
 
 It is very easy to get started with bit-lib4j:
 
-* Read data from byte tab
+* Read data from byte array
 
 ```java
 	byte[] array = new byte[]{0x12,0x25}
@@ -17,7 +17,7 @@ It is very easy to get started with bit-lib4j:
 	int res = bit.getNextInteger(4);      // read the first 4 bits to an integer
 ```
 
-* Create byte tab with bit
+* Create byte array with bit
 
 ```java
 	BitUtils bit = new BitUtils(8);
@@ -27,6 +27,15 @@ It is very easy to get started with bit-lib4j:
 	// Result
 	bit.getData();                        // return Ox61  (0110 0001b)
 ```
+
+##Dependencies
+
+If you are not using Maven or some other dependency management tool that can understand Maven repositories, the list below is what you need to run bit-lib4j.
+
+**Runtime Dependencies**
+* slf4j-api 1.6.6
+
+
 
 ## Author
 
