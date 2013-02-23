@@ -28,6 +28,8 @@ It is very easy to get started with bit-lib4j:
 	bit.getData();                        // return Ox61  (0110 0001b)
 ```
 
+More documentation with the [wiki](https://github.com/devnied/Bit-lib4j/wiki)
+
 ##Dependencies
 
 If you are not using Maven or some other dependency management tool that can understand Maven repositories, the list below is what you need to run bit-lib4j.
