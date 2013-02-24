@@ -1,7 +1,7 @@
 # Directories #
 /build/
 /bin/
-target/
+target/*/
  
 # OS Files #
 .DS_Store
@@ -9,7 +9,6 @@ target/
 *.class
  
 # Package Files #
-*.jar
 *.war
 *.ear
 *.db
@@ -69,3 +68,6 @@ local.properties
  
 # PDT-specific
 .buildpath
+pom.xml.releaseBackup
+
+release.properties
