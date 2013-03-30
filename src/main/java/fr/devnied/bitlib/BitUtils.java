@@ -102,17 +102,17 @@ public final class BitUtils {
 	 * 
 	 * @param pIndex
 	 *            start index of the mask
-	 * @param pLenght
+	 * @param pLength
 	 *            size of mask
 	 * @return the mask in byte
 	 */
-	public byte getMask(final int pIndex, final int pLenght) {
+	public byte getMask(final int pIndex, final int pLength) {
 		byte ret = (byte) DEFAULT_VALUE;
 		// Add X 0 to the left
 		ret = (byte) (ret << pIndex);
 		ret = (byte) ((ret & DEFAULT_VALUE) >> pIndex);
 		// Add X 0 to the right
-		int dec = BYTE_SIZE - (pLenght + pIndex);
+		int dec = BYTE_SIZE - (pLength + pIndex);
 		if (dec > 0) {
 			ret = (byte) (ret >> dec);
 			ret = (byte) (ret << dec);
@@ -149,16 +149,16 @@ public final class BitUtils {
 			while (currentBitIndex < max) {
 				int mod = currentBitIndex % BYTE_SIZE;
 				int modTab = index % BYTE_SIZE;
-				int lenght = Math.min(max - currentBitIndex, Math.min(BYTE_SIZE - mod, BYTE_SIZE - modTab));
-				byte val = (byte) (byteTab[currentBitIndex / BYTE_SIZE] & getMask(mod, lenght));
+				int length = Math.min(max - currentBitIndex, Math.min(BYTE_SIZE - mod, BYTE_SIZE - modTab));
+				byte val = (byte) (byteTab[currentBitIndex / BYTE_SIZE] & getMask(mod, length));
 				if (mod != 0) {
-					val = (byte) (val << Math.min(mod, BYTE_SIZE - lenght));
+					val = (byte) (val << Math.min(mod, BYTE_SIZE - length));
 				} else {
 					val = (byte) ((val & DEFAULT_VALUE) >> modTab);
 				}
 				tab[index / BYTE_SIZE] |= val;
-				currentBitIndex += lenght;
-				index += lenght;
+				currentBitIndex += length;
+				index += length;
 			}
 		} else {
 			System.arraycopy(byteTab, currentBitIndex / BYTE_SIZE, tab, 0, tab.length);
@@ -205,11 +205,11 @@ public final class BitUtils {
 	/**
 	 * This method is used to get an integer with the specified size
 	 * 
-	 * @param pLenght
+	 * @param pLength
 	 *            the length of the data to read in bit
 	 * @return an integer
 	 */
-	public int getNextInteger(final int pLenght) {
+	public int getNextInteger(final int pLength) {
 		// allocate Size of Integer
 		ByteBuffer buffer = ByteBuffer.allocate(INTEGER_BYTE_SIZE);
 		// final value
@@ -217,20 +217,20 @@ public final class BitUtils {
 		// Incremental value
 		int currentValue = 0;
 		// Size to read
-		int readSize = pLenght;
+		int readSize = pLength;
 		// length max of the index
-		int max = currentBitIndex + pLenght;
+		int max = currentBitIndex + pLength;
 		while (currentBitIndex < max) {
 			int mod = currentBitIndex % BYTE_SIZE;
 			// apply the mask to the selected byte
-			currentValue = (byteTab[currentBitIndex / BYTE_SIZE] & getMask(mod, readSize)) & DEFAULT_VALUE;
+			currentValue = byteTab[currentBitIndex / BYTE_SIZE] & getMask(mod, readSize) & DEFAULT_VALUE;
 			// Shift right the read value
 			int dec = Math.max(BYTE_SIZE - (mod + readSize), 0);
-			currentValue = ((currentValue & DEFAULT_VALUE) >>> dec) & DEFAULT_VALUE;
+			currentValue = (currentValue & DEFAULT_VALUE) >>> dec & DEFAULT_VALUE;
 			// Shift left the previously read value and add the current value
-			finalValue = (finalValue << Math.min(readSize, BYTE_SIZE)) | currentValue;
+			finalValue = finalValue << Math.min(readSize, BYTE_SIZE) | currentValue;
 			// calculate read value size
-			int val = (BYTE_SIZE - mod);
+			int val = BYTE_SIZE - mod;
 			// Decrease the size left
 			readSize = readSize - val;
 			currentBitIndex = Math.min(currentBitIndex + val, max);
@@ -307,35 +307,54 @@ public final class BitUtils {
 	 *            the length of the data in bits
 	 */
 	public void setNextByte(final byte[] pValue, final int pLenght) {
-		int totalSize = (int) Math.ceil(pLenght / BYTE_SIZE_F);
+		setNextByte(pValue, pLenght, true);
+	}
+
+	/**
+	 * Method to write bytes with the max length
+	 * 
+	 * @param pValue
+	 *            the value to write
+	 * @param pLength
+	 *            the length of the data in bits
+	 */
+	public void setNextByte(final byte[] pValue, final int pLength, final boolean pPadBefore) {
+		int totalSize = (int) Math.ceil(pLength / BYTE_SIZE_F);
 		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
-		int size = totalSize - pValue.length;
-		for (int i = 0; i < size; i++) {
-			buffer.put((byte) 0);
+		int size = Math.max(totalSize - pValue.length, 0);
+		if (pPadBefore) {
+			for (int i = 0; i < size; i++) {
+				buffer.put((byte) 0);
+			}
 		}
-		buffer.put(pValue);
+		buffer.put(pValue, 0, Math.min(totalSize, pValue.length));
+		if (!pPadBefore) {
+			for (int i = 0; i < size; i++) {
+				buffer.put((byte) 0);
+			}
+		}
 		byte tab[] = buffer.array();
 		if (currentBitIndex % BYTE_SIZE != 0) {
 			int index = 0;
-			int max = currentBitIndex + pLenght;
+			int max = currentBitIndex + pLength;
 			while (currentBitIndex < max) {
 				int mod = currentBitIndex % BYTE_SIZE;
 				int modTab = index % BYTE_SIZE;
-				int lenght = Math.min(max - currentBitIndex, Math.min(BYTE_SIZE - mod, BYTE_SIZE - modTab));
-				byte val = (byte) (tab[index / BYTE_SIZE] & getMask(modTab, lenght));
+				int length = Math.min(max - currentBitIndex, Math.min(BYTE_SIZE - mod, BYTE_SIZE - modTab));
+				byte val = (byte) (tab[index / BYTE_SIZE] & getMask(modTab, length));
 				if (mod == 0) {
-					val = (byte) (val << Math.min(modTab, BYTE_SIZE - lenght));
+					val = (byte) (val << Math.min(modTab, BYTE_SIZE - length));
 				} else {
 					val = (byte) ((val & DEFAULT_VALUE) >> mod);
 				}
 				byteTab[currentBitIndex / BYTE_SIZE] |= val;
-				currentBitIndex += lenght;
-				index += lenght;
+				currentBitIndex += length;
+				index += length;
 			}
 
 		} else {
 			System.arraycopy(tab, 0, byteTab, currentBitIndex / BYTE_SIZE, tab.length);
-			currentBitIndex += pLenght;
+			currentBitIndex += pLength;
 		}
 	}
 
@@ -350,8 +369,9 @@ public final class BitUtils {
 	public void setNextDate(final Date pValue, final String pPattern) {
 		// create date formatter
 		SimpleDateFormat sdf = new SimpleDateFormat(pPattern);
+		String value = sdf.format(pValue);
 		// get String
-		setNextString(sdf.format(pValue));
+		setNextString(value, value.length());
 	}
 
 	/**
@@ -359,33 +379,38 @@ public final class BitUtils {
 	 * 
 	 * @param pValue
 	 *            the value to write
-	 * @param pLenght
+	 * @param pLength
 	 *            the length of the data in bits
 	 */
-	public void setNextHexaString(final String pValue, final int pLenght) {
-		setNextByte(BytesUtils.fromString(pValue), pLenght);
+	public void setNextHexaString(final String pValue, final int pLength) {
+		setNextByte(BytesUtils.fromString(pValue), pLength);
 	}
 
 	/**
 	 * Add Integer to the current position with the specified size
 	 * 
-	 * @param pLenght
+	 * @param pLength
 	 *            the length of the integer
 	 */
-	public void setNextInteger(final int pValue, final int pLenght) {
+	public void setNextInteger(final int pValue, final int pLength) {
+		int value = pValue;
+		// Set to max value if pValue cannot be stored on pLength bits.
+		if (pValue >= 1 << pLength) {
+			value = (1 << pLength) - 1;
+		}
 		// size to wrote
-		int writeSize = pLenght;
+		int writeSize = pLength;
 		while (writeSize > 0) {
 			// modulo
 			int mod = currentBitIndex % BYTE_SIZE;
 			byte ret = 0;
-			if (mod == 0 && writeSize <= BYTE_SIZE || pLenght < BYTE_SIZE - mod) {
+			if (mod == 0 && writeSize <= BYTE_SIZE || pLength < BYTE_SIZE - mod) {
 				// shift left value
-				ret = (byte) (pValue << BYTE_SIZE - (writeSize + mod));
+				ret = (byte) (value << BYTE_SIZE - (writeSize + mod));
 			} else {
 				// shift right
-				int taille = Integer.toBinaryString(pValue).length();
-				ret = (byte) (pValue >> (writeSize - taille - (BYTE_SIZE - taille - mod)));
+				int length = Integer.toBinaryString(value).length();
+				ret = (byte) (value >> writeSize - length - (BYTE_SIZE - length - mod));
 			}
 			byteTab[currentBitIndex / BYTE_SIZE] |= ret;
 			int val = Math.min(writeSize, BYTE_SIZE - mod);
@@ -400,7 +425,21 @@ public final class BitUtils {
 	 * @param pValue
 	 *            the string to write
 	 */
-	public void setNextString(final String pValue) {
-		setNextByte(pValue.getBytes(Charset.defaultCharset()), pValue.length() * BYTE_SIZE);
+	public void setNextString(final String pValue, final int pLength) {
+		setNextString(pValue, pLength, true);
+	}
+
+	/**
+	 * Method to write a String
+	 * 
+	 * @param pValue
+	 *            the string to write
+	 * @param pLenth
+	 *            the string length
+	 * @param pPaddedBefore
+	 *            indicate if the string is padded before or after
+	 */
+	public void setNextString(final String pValue, final int pLength, final boolean pPaddedBefore) {
+		setNextByte(pValue.getBytes(Charset.defaultCharset()), pLength, pPaddedBefore);
 	}
 }

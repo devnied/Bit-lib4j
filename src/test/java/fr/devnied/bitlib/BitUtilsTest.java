@@ -231,6 +231,20 @@ public final class BitUtilsTest {
 	}
 
 	/**
+	 * Test the method to set an integer
+	 */
+	@Test
+	public void testSetIntegerOverflow() {
+
+		BitUtils bit = new BitUtils(128);
+		bit.setNextInteger(10, 2);
+		bit.setNextInteger(256, 1);
+		bit.reset();
+		Assertions.assertThat(bit.getNextInteger(2)).isEqualTo(3);
+		Assertions.assertThat(bit.getNextInteger(1)).isEqualTo(1);
+	}
+
+	/**
 	 * Test the method to set bytes
 	 */
 	@Test
@@ -293,22 +307,37 @@ public final class BitUtilsTest {
 	 * Test the method to set an integer
 	 */
 	@Test
+	public void testSetPaddedString() {
+
+		String text = "123456789";
+		BitUtils bit = new BitUtils(160);
+		bit.setNextString(text, 10 * 8, true);
+		bit.setNextString(text, 10 * 8, false);
+		bit.reset();
+		Assertions.assertThat(bit.getNextString(10 * 8)).isEqualTo('\0' + text);
+		Assertions.assertThat(bit.getNextString(10 * 8)).isEqualTo(text + '\0');
+	}
+
+	/**
+	 * Test the method to set an integer
+	 */
+	@Test
 	public void testSetString() {
 
 		String text1 = "test";
 		String text2 = " OK";
 		BitUtils bit = new BitUtils((text1.length() + text2.length()) * 8 + 5);
 		bit.setNextInteger(3, 5);
-		bit.setNextString(text1);
-		bit.setNextString(text2);
+		bit.setNextString(text1, text1.length() * 8);
+		bit.setNextString(text2, 2 * 8);
 		bit.reset();
 
 		Assertions.assertThat(bit.getNextInteger(5)).isEqualTo(3);
 		Assertions.assertThat(bit.getNextString(text1.length() * 8)).isEqualTo(text1);
-		Assertions.assertThat(bit.getNextString(text2.length() * 8)).isEqualTo(text2);
+		Assertions.assertThat(bit.getNextString(2 * 8)).isEqualTo(" O");
 		bit.reset();
 		Assertions.assertThat(bit.getNextInteger(5)).isEqualTo(3);
-		Assertions.assertThat(bit.getNextString((text1.length() + text2.length()) * 8)).isEqualTo(text1 + text2);
+		Assertions.assertThat(bit.getNextString((text1.length() + 2) * 8)).isEqualTo(text1 + " O");
 	}
 
 }
