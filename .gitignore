@@ -2,6 +2,8 @@
 /build/
 /bin/
 target/*/
+target/*.pom
+target/*.asc
  
 # OS Files #
 .DS_Store
