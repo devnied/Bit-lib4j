@@ -23,7 +23,7 @@ It is very easy to get started with bit-lib4j:
 ```java
 	BitUtils bit = new BitUtils(8);
 	bit.setNextInteger(3,3);			  // set an integer on 3 bits
-	bit.setNextInteger(1,5);		      // set one value on 4 bits
+	bit.setNextInteger(1,5);		      // set one value on 5 bits
 	
 	// Result
 	bit.getData();                        // return Ox61  (0110 0001b)
