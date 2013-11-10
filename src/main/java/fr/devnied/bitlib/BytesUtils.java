@@ -85,8 +85,11 @@ public final class BytesUtils {
 	 * @return a table of string
 	 */
 	public static byte[] fromString(final String pData) {
-		String text = pData.replace(" ", "").trim();
-		byte[] commandByte = new byte[text.length() / 2];
+		if (pData.length() % 2 != 0) {
+			throw new IllegalArgumentException("Hex binary needs to be even-length :" + pData);
+		}
+		String text = pData.replace(" ", "");
+		byte[] commandByte = new byte[Math.round(text.length() / (float) 2.0)];
 		int j = 0;
 		for (int i = 0; i < text.length(); i += 2) {
 			Integer val = Integer.parseInt(text.substring(i, i + 2), HEXA);
@@ -105,7 +108,7 @@ public final class BytesUtils {
 	 * @return true bit at given index of give value is = 1
 	 */
 	public static boolean matchBitByBitIndex(final int pVal, final int pBitIndex) {
-		return (pVal & (1 << pBitIndex)) != 0;
+		return (pVal & 1 << pBitIndex) != 0;
 	}
 
 	/**

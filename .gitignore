@@ -1,9 +1,7 @@
 # Directories #
 /build/
 /bin/
-target/*/
-target/*.pom
-target/*.asc
+target/
  
 # OS Files #
 .DS_Store

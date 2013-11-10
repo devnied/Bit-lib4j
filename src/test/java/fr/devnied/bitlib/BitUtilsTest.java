@@ -301,6 +301,15 @@ public final class BitUtilsTest {
 		bit.reset();
 		Assertions.assertThat(bit.getNextBoolean()).isEqualTo(true);
 		Assertions.assertThat(bit.getNextHexaString(text1.length() / 2 * 4)).isEqualTo("112230");
+
+		bit = new BitUtils(20);
+		try {
+			bit.setNextHexaString("AAB", 20);
+			org.junit.Assert.fail();
+		} catch (IllegalArgumentException iae) {
+			org.junit.Assert.assertTrue(true);
+		}
+
 	}
 
 	/**
