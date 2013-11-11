@@ -4,7 +4,7 @@ Bit-lib4j [![Build Status](https://travis-ci.org/devnied/Bit-lib4j.png?branch=ma
 Bit-Lib4j is an useful library to manipulate bits in Java.<br/>
 With this library you can read/write data in a byte array with a custom size for Java primitive types.
 
-<b>Current version : 1.4.1</b> 
+<b>Current version : 1.4.2</b> 
 
 ##Simple API
 
@@ -31,21 +31,28 @@ It is very easy to get started with bit-lib4j:
 
 More documentation into the [wiki](https://github.com/devnied/Bit-lib4j/wiki)
 
-## Maven
+## Download
+
+### Maven
 
 ```xml
 <dependency>
   <groupId>com.github.devnied</groupId>
   <artifactId>bit-lib4j</artifactId>
-  <version>1.4.1</version>
+  <version>1.4.2</version>
 </dependency>
 ```
+
+### JAR
+
+You can download this library on [Maven central](http://search.maven.org/#search%7Cga%7C1%7Cbit-lib4j).
+
 ##Dependencies
 
 If you are not using Maven or some other dependency management tool that can understand Maven repositories, the list below is what you need to run bit-lib4j.
 
 **Runtime Dependencies**
-* slf4j-api 1.6.6
+* slf4j-api 1.7.5
 
 ## Bugs
 
