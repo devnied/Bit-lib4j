@@ -85,10 +85,13 @@ public final class BytesUtils {
 	 * @return a table of string
 	 */
 	public static byte[] fromString(final String pData) {
-		if (pData.length() % 2 != 0) {
-			throw new IllegalArgumentException("Hex binary needs to be even-length :" + pData);
+		if (pData == null) {
+			throw new IllegalArgumentException("Argument can't be null");
 		}
 		String text = pData.replace(" ", "");
+		if (text.length() % 2 != 0) {
+			throw new IllegalArgumentException("Hex binary needs to be even-length :" + pData);
+		}
 		byte[] commandByte = new byte[Math.round(text.length() / (float) 2.0)];
 		int j = 0;
 		for (int i = 0; i < text.length(); i += 2) {

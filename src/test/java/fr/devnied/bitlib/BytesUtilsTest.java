@@ -1,6 +1,7 @@
 package fr.devnied.bitlib;
 
 import org.fest.assertions.Assertions;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -25,6 +26,20 @@ public final class BytesUtilsTest {
 	 */
 	@Test
 	public void testBytesFromString() {
+		try {
+			BytesUtils.fromString(" 00 5");
+			Assert.fail();
+		} catch (Exception e) {
+		}
+
+		try {
+			BytesUtils.fromString(null);
+			Assert.fail();
+		} catch (Exception e) {
+		}
+
+		Assertions.assertThat(BytesUtils.fromString(" 00 54 ")).isEqualTo(new byte[] { 0x00, 0x54 });
+
 		Assertions.assertThat(BytesUtils.fromString("00 54 0A9B")).isEqualTo(new byte[] { 0x00, 0x54, 0x0A, (byte) 0x9B });
 		Assertions.assertThat(BytesUtils.fromString("000ABC")).isEqualTo(new byte[] { 0x00, 0x0A, (byte) 0xBC });
 	}
