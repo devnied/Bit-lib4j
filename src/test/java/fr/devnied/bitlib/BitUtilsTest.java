@@ -358,4 +358,17 @@ public final class BitUtilsTest {
 		Assertions.assertThat(bit.getNextString((text1.length() + 2) * 8)).isEqualTo(text1 + " O");
 	}
 
+	/**
+	 * Unit test for size
+	 */
+	@Test
+	public void testSize() {
+		BitUtils bit = new BitUtils(289);
+		Assertions.assertThat(bit.getSize()).isEqualTo(289);
+
+		bit = new BitUtils(new byte[] { 0x33, 0x12 });
+		Assertions.assertThat(bit.getSize()).isEqualTo(2 * 8);
+
+	}
+
 }

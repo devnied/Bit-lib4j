@@ -57,6 +57,11 @@ public final class BitUtils {
 	private int currentBitIndex;
 
 	/**
+	 * Size in bit of the byte tab
+	 */
+	private final int size;
+
+	/**
 	 * Constructor of the class
 	 * 
 	 * @param pByte
@@ -65,6 +70,7 @@ public final class BitUtils {
 	public BitUtils(final byte pByte[]) {
 		byteTab = new byte[pByte.length];
 		System.arraycopy(pByte, 0, byteTab, 0, pByte.length);
+		size = pByte.length * BYTE_SIZE;
 	}
 
 	/**
@@ -75,6 +81,7 @@ public final class BitUtils {
 	 */
 	public BitUtils(final int pSize) {
 		byteTab = new byte[(int) Math.ceil(pSize / BYTE_SIZE_F)];
+		size = pSize;
 	}
 
 	/**
@@ -265,6 +272,15 @@ public final class BitUtils {
 	 */
 	public String getNextString(final int pSize, final Charset pCharset) {
 		return new String(getNextByte(pSize), pCharset);
+	}
+
+	/**
+	 * Method used to get the size of the bit array
+	 * 
+	 * @return the size in bits of the current bit array
+	 */
+	public int getSize() {
+		return size;
 	}
 
 	/**
