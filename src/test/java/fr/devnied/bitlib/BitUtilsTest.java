@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.fest.assertions.Assertions;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -228,6 +229,14 @@ public final class BitUtilsTest {
 		Assertions.assertThat(bit.getNextInteger(1)).isEqualTo(1);
 		Assertions.assertThat(bit.getNextInteger(1)).isEqualTo(0);
 		Assertions.assertThat(bit.getNextInteger(1)).isEqualTo(1);
+
+		bit.reset();
+		try {
+			bit.setNextInteger(500, 32);
+			Assert.fail();
+		} catch (IllegalArgumentException iae) {
+
+		}
 	}
 
 	/**

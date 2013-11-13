@@ -394,6 +394,11 @@ public final class BitUtils {
 	 */
 	public void setNextInteger(final int pValue, final int pLength) {
 		int value = pValue;
+
+		if (pLength > 31) {
+			throw new IllegalArgumentException("Integer overflow with length > 31");
+		}
+
 		// Set to max value if pValue cannot be stored on pLength bits.
 		if (pValue >= 1 << pLength) {
 			value = (1 << pLength) - 1;
