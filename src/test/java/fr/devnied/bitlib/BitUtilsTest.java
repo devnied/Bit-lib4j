@@ -33,7 +33,16 @@ public final class BitUtilsTest {
 		Assertions.assertThat(bit.getNextInteger(4)).isEqualTo(1);
 		Assertions.assertThat(bit.getCurrentBitIndex()).isEqualTo(4);
 		bit.setCurrentBitIndex(5);
+		bit.addCurrentBitIndex(-1);
+		bit.addCurrentBitIndex(1);
+		Assertions.assertThat(bit.getCurrentBitIndex()).isEqualTo(5);
 		Assertions.assertThat(bit.getNextInteger(3)).isEqualTo(1);
+		bit.addCurrentBitIndex(-1000);
+		Assertions.assertThat(bit.getCurrentBitIndex()).isEqualTo(0);
+
+		BitUtils bit2 = new BitUtils(new byte[] { (byte) 0xFE });
+		bit2.addCurrentBitIndex(7);
+		Assertions.assertThat(bit2.getNextBoolean()).isEqualTo(false);
 
 	}
 

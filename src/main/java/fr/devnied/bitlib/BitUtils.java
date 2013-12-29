@@ -85,6 +85,19 @@ public final class BitUtils {
 	}
 
 	/**
+	 * Add pIndex to the current value of bitIndex
+	 * 
+	 * @param pIndex
+	 *            the value to add to bitIndex
+	 */
+	public void addCurrentBitIndex(final int pIndex) {
+		currentBitIndex += pIndex;
+		if (currentBitIndex < 0) {
+			currentBitIndex = 0;
+		}
+	}
+
+	/**
 	 * Getter for the currentBitIndex
 	 * 
 	 * @return the currentBitIndex
