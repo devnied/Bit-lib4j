@@ -103,7 +103,7 @@ public final class BitUtilsTest {
 
 		String val = "20130108";
 		BitUtils bit = new BitUtils(val.getBytes());
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		SimpleDateFormat sdf = new SimpleDateFormat(BitUtils.DATE_FORMAT);
 		Date d = sdf.parse(val);
 
 		Assertions.assertThat(bit.getNextDate(8 * 8, BitUtils.DATE_FORMAT)).isEqualTo(d);
@@ -116,7 +116,10 @@ public final class BitUtilsTest {
 		Assertions.assertThat(bit.getNextDate(4 * 8, "yyyy")).isEqualTo(year);
 		bit.reset();
 
-		Assertions.assertThat(bit.getNextDate(4 * 8, "yyyyMMdd")).isEqualTo(null);
+		Assertions.assertThat(bit.getNextDate(4 * 8, BitUtils.DATE_FORMAT)).isEqualTo(null);
+
+		bit = new BitUtils(BytesUtils.fromString(val));
+		Assertions.assertThat(bit.getNextDate(8 * 4, BitUtils.DATE_FORMAT, true)).isEqualTo(d);
 
 	}
 
@@ -338,6 +341,10 @@ public final class BitUtilsTest {
 		bit.setNextDate(d, BitUtils.DATE_FORMAT);
 		bit.reset();
 		Assertions.assertThat(sdf.format(bit.getNextDate(8 * 8, BitUtils.DATE_FORMAT))).isEqualTo(val);
+		bit.reset();
+		bit.setNextDate(d, BitUtils.DATE_FORMAT, true);
+		bit.reset();
+		Assertions.assertThat(bit.getNextHexaString(8 * 4)).isEqualTo(val);
 	}
 
 	/**

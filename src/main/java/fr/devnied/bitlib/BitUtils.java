@@ -226,11 +226,32 @@ public final class BitUtils {
 	 * @return a date object or null
 	 */
 	public Date getNextDate(final int pSize, final String pPattern) {
+		return getNextDate(pSize, pPattern, false);
+	}
+
+	/**
+	 * Method to get the next date
+	 * 
+	 * @param pSize
+	 *            the size of the string date in bit
+	 * @param pPattern
+	 *            the Date pattern
+	 * @param pUseBcd
+	 *            get the Date with BCD format (Binary coded decimal)
+	 * @return a date object or null
+	 */
+	public Date getNextDate(final int pSize, final String pPattern, final boolean pUseBcd) {
 		Date date = null;
 		// create date formatter
 		SimpleDateFormat sdf = new SimpleDateFormat(pPattern);
 		// get String
-		String dateTxt = getNextString(pSize);
+		String dateTxt = null;
+		if (pUseBcd) {
+			dateTxt = getNextHexaString(pSize);
+		} else {
+			dateTxt = getNextString(pSize);
+		}
+
 		try {
 			date = sdf.parse(dateTxt);
 		} catch (ParseException e) {
@@ -240,7 +261,7 @@ public final class BitUtils {
 	}
 
 	/**
-	 * This method is used to get the next String in hexa
+	 * This method is used to get the next String in Hexa
 	 * 
 	 * @param pSize
 	 *            the length of the string in bit
@@ -423,11 +444,29 @@ public final class BitUtils {
 	 *            the Date pattern
 	 */
 	public void setNextDate(final Date pValue, final String pPattern) {
+		setNextDate(pValue, pPattern, false);
+	}
+
+	/**
+	 * Method to write a date
+	 * 
+	 * @param pValue
+	 *            the value to write
+	 * @param pPattern
+	 *            the Date pattern
+	 * @param pUseBcd
+	 *            write date as BCD (binary coded decimal)
+	 */
+	public void setNextDate(final Date pValue, final String pPattern, final boolean pUseBcd) {
 		// create date formatter
 		SimpleDateFormat sdf = new SimpleDateFormat(pPattern);
 		String value = sdf.format(pValue);
-		// get String
-		setNextString(value, value.length() * 8);
+
+		if (pUseBcd) {
+			setNextHexaString(value, value.length() * 4);
+		} else {
+			setNextString(value, value.length() * 8);
+		}
 	}
 
 	/**
