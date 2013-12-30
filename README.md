@@ -1,4 +1,4 @@
-Bit-lib4j [![Build Status](https://travis-ci.org/devnied/Bit-lib4j.png?branch=master)](https://travis-ci.org/devnied/Bit-lib4j)
+Bit-lib4j [![Build Status](https://travis-ci.org/devnied/Bit-lib4j.png?branch=master)](https://travis-ci.org/devnied/Bit-lib4j) [![Coverage Status](https://coveralls.io/repos/devnied/Bit-lib4j/badge.png?branch=master)](https://coveralls.io/r/devnied/Bit-lib4j?branch=master)
 ========
 
 Bit-Lib4j is an useful library to manipulate bits in Java.<br/>
