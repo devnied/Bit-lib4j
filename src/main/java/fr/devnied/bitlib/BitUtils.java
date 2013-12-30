@@ -154,13 +154,31 @@ public final class BitUtils {
 	}
 
 	/**
+	 * Method used to get the next byte and shift read data to the beginning of the array.<br/>
+	 * (Ex 00110000b if we start read 2 bit at index 2 the data returned will be 11000000b)
+	 * 
+	 * @param pSize
+	 *            the size in bit to read
+	 * @return the byte array read
+	 */
+	public byte[] getNextByte(final int pSize) {
+		return getNextByte(pSize, true);
+	}
+
+	/**
 	 * Method to get The next bytes with the specified size
 	 * 
 	 * @param pSize
-	 *            the length of byte to read
-	 * @return a byte tab
+	 *            the size in bit to read
+	 * @param pShift
+	 *            boolean to indicate if the data read will be shift to the left.<br/>
+	 *            <ul>
+	 *            <li>if true : (Ex 10110000b if we start read 2 bit at index 2 the returned data will be 11000000b)</li>
+	 *            <li>if false : (Ex 10110000b if we start read 2 bit at index 2 the returned data will be 00110000b)</li>
+	 *            </ul>
+	 * @return a byte array
 	 */
-	public byte[] getNextByte(final int pSize) {
+	public byte[] getNextByte(final int pSize, final boolean pShift) {
 		byte[] tab = new byte[(int) Math.ceil(pSize / BYTE_SIZE_F)];
 
 		if (currentBitIndex % BYTE_SIZE != 0) {
@@ -171,17 +189,27 @@ public final class BitUtils {
 				int modTab = index % BYTE_SIZE;
 				int length = Math.min(max - currentBitIndex, Math.min(BYTE_SIZE - mod, BYTE_SIZE - modTab));
 				byte val = (byte) (byteTab[currentBitIndex / BYTE_SIZE] & getMask(mod, length));
-				if (mod != 0) {
-					val = (byte) (val << Math.min(mod, BYTE_SIZE - length));
-				} else {
-					val = (byte) ((val & DEFAULT_VALUE) >> modTab);
+				if (pShift || pSize % BYTE_SIZE == 0) {
+					if (mod != 0) {
+						val = (byte) (val << Math.min(mod, BYTE_SIZE - length));
+					} else {
+						val = (byte) ((val & DEFAULT_VALUE) >> modTab);
+					}
 				}
 				tab[index / BYTE_SIZE] |= val;
 				currentBitIndex += length;
 				index += length;
 			}
+			if (!pShift && pSize % BYTE_SIZE != 0) {
+				tab[tab.length - 1] = (byte) (tab[tab.length - 1] & getMask((max - pSize - 1) % BYTE_SIZE, BYTE_SIZE));
+			}
 		} else {
 			System.arraycopy(byteTab, currentBitIndex / BYTE_SIZE, tab, 0, tab.length);
+			int val = pSize % BYTE_SIZE;
+			if (val == 0) {
+				val = BYTE_SIZE;
+			}
+			tab[tab.length - 1] = (byte) (tab[tab.length - 1] & getMask(currentBitIndex % BYTE_SIZE, val));
 			currentBitIndex += pSize;
 		}
 
@@ -219,7 +247,7 @@ public final class BitUtils {
 	 * @return the string
 	 */
 	public String getNextHexaString(final int pSize) {
-		return BytesUtils.bytesToStringNoSpace(getNextByte(pSize));
+		return BytesUtils.bytesToStringNoSpace(getNextByte(pSize, true));
 	}
 
 	/**
@@ -263,8 +291,7 @@ public final class BitUtils {
 	}
 
 	/**
-	 * This method is used to get the next String with the specified size with
-	 * the charset ASCII
+	 * This method is used to get the next String with the specified size with the charset ASCII
 	 * 
 	 * @param pSize
 	 *            the length of the string in bit
@@ -284,7 +311,7 @@ public final class BitUtils {
 	 * @return the string
 	 */
 	public String getNextString(final int pSize, final Charset pCharset) {
-		return new String(getNextByte(pSize), pCharset);
+		return new String(getNextByte(pSize, true), pCharset);
 	}
 
 	/**
@@ -400,7 +427,7 @@ public final class BitUtils {
 		SimpleDateFormat sdf = new SimpleDateFormat(pPattern);
 		String value = sdf.format(pValue);
 		// get String
-		setNextString(value, value.length());
+		setNextString(value, value.length() * 8);
 	}
 
 	/**

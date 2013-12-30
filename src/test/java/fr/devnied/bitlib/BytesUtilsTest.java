@@ -64,6 +64,12 @@ public final class BytesUtilsTest {
 		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(tab2)).isEqualTo("00010245");
 	}
 
+	@Test(expected = IllegalAccessException.class)
+	public void testConstructorPrivate() throws Exception {
+		BytesUtils.class.newInstance();
+		Assert.fail("Utility class constructor should be private");
+	}
+
 	/**
 	 * 
 	 */

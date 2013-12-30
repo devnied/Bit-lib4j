@@ -70,6 +70,31 @@ public final class BitUtilsTest {
 		Assertions.assertThat(bit.getNextHexaString(8)).isEqualTo("EF");
 	}
 
+	@Test
+	public void testGetNextByte() {
+		BitUtils bit = new BitUtils(test);
+		Assertions.assertThat(bit.getNextByte(4, false)).isEqualTo(new byte[] { 0x10 });
+		Assertions.assertThat(bit.getNextByte(4, false)).isEqualTo(new byte[] { 0x01 });
+		Assertions.assertThat(bit.getNextByte(16, false)).isEqualTo(new byte[] { 0x00, 0x00 });
+		Assertions.assertThat(bit.getNextByte(2, false)).isEqualTo(new byte[] { 0x40 });
+		Assertions.assertThat(bit.getNextByte(2, false)).isEqualTo(new byte[] { 0x20 });
+		bit.reset();
+		Assertions.assertThat(bit.getNextByte(2, false)).isEqualTo(new byte[] { 0x00 });
+		Assertions.assertThat(bit.getNextByte(8, false)).isEqualTo(new byte[] { 0x44 });
+		bit.reset();
+		Assertions.assertThat(bit.getNextByte(4)).isEqualTo(new byte[] { 0x10 });
+		Assertions.assertThat(bit.getNextByte(4)).isEqualTo(new byte[] { 0x10 });
+
+		bit = new BitUtils(new byte[] { 0x44, (byte) 0xFE });
+		Assertions.assertThat(bit.getNextByte(4, false)).isEqualTo(new byte[] { 0x40 });
+		Assertions.assertThat(bit.getNextByte(8, false)).isEqualTo(new byte[] { (byte) 0x4F });
+		Assertions.assertThat(bit.getNextByte(4, false)).isEqualTo(new byte[] { (byte) 0x0E });
+		bit.reset();
+		Assertions.assertThat(bit.getNextByte(4, true)).isEqualTo(new byte[] { 0x40 });
+		Assertions.assertThat(bit.getNextByte(8, true)).isEqualTo(new byte[] { (byte) 0x4F });
+		Assertions.assertThat(bit.getNextByte(4, true)).isEqualTo(new byte[] { (byte) 0xE0 });
+	}
+
 	/**
 	 * @throws ParseException
 	 */
@@ -301,6 +326,18 @@ public final class BitUtilsTest {
 		Assertions.assertThat(bit.getNextHexaString(9)).isEqualTo("8900");
 		bit.reset();
 		Assertions.assertThat(bit.getNextHexaString(8)).isEqualTo("89");
+	}
+
+	@Test
+	public void testSetNextDate() throws ParseException {
+
+		String val = "20130108";
+		BitUtils bit = new BitUtils(100);
+		SimpleDateFormat sdf = new SimpleDateFormat(BitUtils.DATE_FORMAT);
+		Date d = sdf.parse(val);
+		bit.setNextDate(d, BitUtils.DATE_FORMAT);
+		bit.reset();
+		Assertions.assertThat(sdf.format(bit.getNextDate(8 * 8, BitUtils.DATE_FORMAT))).isEqualTo(val);
 	}
 
 	/**
