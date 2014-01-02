@@ -352,6 +352,22 @@ public final class BitUtils {
 	}
 
 	/**
+	 * Set to 0 the next N bits
+	 * 
+	 * @param pLength
+	 *            the number of bit to set at 0
+	 */
+	public void resetNextBits(final int pLength) {
+		int max = currentBitIndex + pLength;
+		while (currentBitIndex < max) {
+			int mod = currentBitIndex % BYTE_SIZE;
+			int length = Math.min(max - currentBitIndex, BYTE_SIZE - mod);
+			byteTab[currentBitIndex / BYTE_SIZE] &= ~getMask(mod, length);
+			currentBitIndex += length;
+		}
+	}
+
+	/**
 	 * Setter currentBitIndex
 	 * 
 	 * @param pCurrentBitIndex
@@ -380,11 +396,11 @@ public final class BitUtils {
 	 * 
 	 * @param pValue
 	 *            the value to write
-	 * @param pLenght
+	 * @param pLength
 	 *            the length of the data in bits
 	 */
-	public void setNextByte(final byte[] pValue, final int pLenght) {
-		setNextByte(pValue, pLenght, true);
+	public void setNextByte(final byte[] pValue, final int pLength) {
+		setNextByte(pValue, pLength, true);
 	}
 
 	/**

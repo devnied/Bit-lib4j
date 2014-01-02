@@ -205,6 +205,30 @@ public final class BitUtilsTest {
 	}
 
 	/**
+	 * Unit test for resetNextBits
+	 */
+	@Test
+	public void testResetNextBits() {
+		BitUtils bit = new BitUtils(10);
+		bit.setNextInteger(1000, 8);
+		bit.reset();
+		Assertions.assertThat(bit.getNextHexaString(8)).isEqualTo("FF");
+		bit.reset();
+		bit.resetNextBits(4);
+		bit.reset();
+		Assertions.assertThat(bit.getNextHexaString(8)).isEqualTo("0F");
+		bit = new BitUtils(new byte[] { (byte) 0xFF, (byte) 0xFF });
+		bit.resetNextBits(12);
+		bit.reset();
+		Assertions.assertThat(bit.getNextHexaString(16)).isEqualTo("000F");
+		bit = new BitUtils(new byte[] { (byte) 0xFF, (byte) 0xFF });
+		bit.addCurrentBitIndex(2);
+		bit.resetNextBits(11);
+		bit.reset();
+		Assertions.assertThat(bit.getNextHexaString(16)).isEqualTo("C007");
+	}
+
+	/**
 	 * Test the method to set an integer
 	 */
 	@Test
@@ -421,7 +445,6 @@ public final class BitUtilsTest {
 
 		bit = new BitUtils(new byte[] { 0x33, 0x12 });
 		Assertions.assertThat(bit.getSize()).isEqualTo(2 * 8);
-
 	}
 
 }
