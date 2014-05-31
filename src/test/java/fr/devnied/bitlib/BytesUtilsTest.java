@@ -91,4 +91,16 @@ public final class BytesUtilsTest {
 		Assertions.assertThat(BytesUtils.matchBitByValue(10, 1)).isEqualTo(false);
 	}
 
+	/**
+	 * 
+	 */
+	@Test
+	public void testToBinary() {
+		Assertions.assertThat(BytesUtils.toBinary(null)).isEqualTo(null);
+		Assertions.assertThat(BytesUtils.toBinary(new byte[] { 0x44, 0x01 })).isEqualTo("0100010000000001");
+		Assertions.assertThat(BytesUtils.toBinary(new byte[] { 0x00, 0x00, 0x00 })).isEqualTo("000000000000000000000000");
+		Assertions.assertThat(BytesUtils.toBinary(new byte[] { (byte) 0xF0, 0x00, 0x00 })).isEqualTo("111100000000000000000000");
+		Assertions.assertThat(BytesUtils.toBinary(new byte[] { (byte) 0xFF })).isEqualTo("11111111");
+	}
+
 }

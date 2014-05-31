@@ -1,5 +1,6 @@
 package fr.devnied.bitlib;
 
+import java.math.BigInteger;
 import java.util.Locale;
 
 /**
@@ -115,18 +116,37 @@ public final class BytesUtils {
 	}
 
 	/**
-	 * Test if both bit representation of initial value and bit representation
-	 * of value to compare = 1
+	 * Test if both bit representation of initial value and bit representation of value to compare = 1
 	 * 
 	 * @param pInitialValue
 	 *            initial value to compare
 	 * @param pValueToCompare
 	 *            value to compare
-	 * @return true if both bit representation of initial value and bit
-	 *         representation of value to compare = 1
+	 * @return true if both bit representation of initial value and bit representation of value to compare = 1
 	 */
 	public static boolean matchBitByValue(final int pInitialValue, final int pValueToCompare) {
 		return matchBitByBitIndex(pInitialValue, MAX_BIT_INTEGER - Integer.numberOfLeadingZeros(pValueToCompare));
+	}
+
+	/**
+	 * Convert byte array to binary String
+	 * 
+	 * @param pBytes
+	 *            byte array to convert
+	 * @return a binary representation of the byte array
+	 */
+	public static String toBinary(final byte[] pBytes) {
+		String ret = null;
+		if (pBytes != null && pBytes.length > 0) {
+			BigInteger val = new BigInteger(bytesToStringNoSpace(pBytes), HEXA);
+			StringBuilder build = new StringBuilder(val.toString(2));
+			// left pad with 0 to fit byte size
+			for (int i = build.length(); i < pBytes.length * BitUtils.BYTE_SIZE; i++) {
+				build.insert(0, 0);
+			}
+			ret = build.toString();
+		}
+		return ret;
 	}
 
 	/**
