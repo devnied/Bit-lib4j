@@ -25,6 +25,25 @@ public final class BytesUtilsTest {
 	 * 
 	 */
 	@Test
+	public void testByteArrayToInt() {
+		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("00000000"))).isEqualTo(0);
+		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("00000001"))).isEqualTo(1);
+		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("7FFFFFFF"))).isEqualTo(Integer.MAX_VALUE);
+		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("80000000"))).isEqualTo(Integer.MIN_VALUE);
+		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("00000100"))).isEqualTo(256);
+		// partial int
+		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("0100"))).isEqualTo(256);
+		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("FF"))).isEqualTo(255);
+		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("FFFF"))).isEqualTo(65535);
+
+		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("00000100"), 2, 1)).isEqualTo(1);
+
+	}
+
+	/**
+	 * 
+	 */
+	@Test
 	public void testBytesFromString() {
 		try {
 			BytesUtils.fromString(" 00 5");
@@ -101,6 +120,18 @@ public final class BytesUtilsTest {
 		Assertions.assertThat(BytesUtils.toBinary(new byte[] { 0x00, 0x00, 0x00 })).isEqualTo("000000000000000000000000");
 		Assertions.assertThat(BytesUtils.toBinary(new byte[] { (byte) 0xF0, 0x00, 0x00 })).isEqualTo("111100000000000000000000");
 		Assertions.assertThat(BytesUtils.toBinary(new byte[] { (byte) 0xFF })).isEqualTo("11111111");
+	}
+
+	/**
+	 * 
+	 */
+	@Test
+	public void testToByteArray() {
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(0))).isEqualTo("00000000");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(1))).isEqualTo("00000001");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(Integer.MAX_VALUE))).isEqualTo("7FFFFFFF");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(Integer.MIN_VALUE))).isEqualTo("80000000");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(256))).isEqualTo("00000100");
 	}
 
 }

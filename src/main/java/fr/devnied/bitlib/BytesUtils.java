@@ -36,6 +36,48 @@ public final class BytesUtils {
 	private static final int DEFAULT_MASK = 0xFF;
 
 	/**
+	 * Method used to convert byte array to int
+	 * 
+	 * @param byteArray
+	 *            byte array to convert
+	 * @return int value
+	 */
+	public static int byteArrayToInt(final byte[] byteArray) {
+		if (byteArray == null) {
+			throw new IllegalArgumentException("Parameter 'byteArray' cannot be null");
+		}
+		return byteArrayToInt(byteArray, 0, byteArray.length);
+	}
+
+	/**
+	 * Method used to convert byte array to int
+	 * 
+	 * @param byteArray
+	 *            byte array to convert
+	 * @param startPos
+	 *            start position in array in the
+	 * @param length
+	 *            length of data
+	 * @return
+	 */
+	public static int byteArrayToInt(final byte[] byteArray, final int startPos, final int length) {
+		if (byteArray == null) {
+			throw new IllegalArgumentException("Parameter 'byteArray' cannot be null");
+		}
+		if (length <= 0 || length > 4) {
+			throw new IllegalArgumentException("Length must be between 1 and 4. Length = " + length);
+		}
+		if (startPos < 0 || byteArray.length < startPos + length) {
+			throw new IllegalArgumentException("Length or startPos not valid");
+		}
+		int value = 0;
+		for (int i = 0; i < length; i++) {
+			value += (byteArray[startPos + i] & 0xFF) << 8 * (length - i - 1);
+		}
+		return value;
+	}
+
+	/**
 	 * Method to convert bytes to string with space between bytes
 	 * 
 	 * @param pBytes
@@ -147,6 +189,22 @@ public final class BytesUtils {
 			ret = build.toString();
 		}
 		return ret;
+	}
+
+	/**
+	 * Method used to convert integer to byet array
+	 * 
+	 * @param value
+	 *            the value to convert
+	 * @return a byte array
+	 */
+	public static byte[] toByteArray(final int value) {
+		return new byte[] { //
+		(byte) (value >> 24), //
+				(byte) (value >> 16), //
+				(byte) (value >> 8), //
+				(byte) value //
+		};
 	}
 
 	/**

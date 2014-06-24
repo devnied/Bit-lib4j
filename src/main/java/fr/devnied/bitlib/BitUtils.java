@@ -23,11 +23,11 @@ public final class BitUtils {
 	/**
 	 * Constant for byte size
 	 */
-	public static final int BYTE_SIZE = 8;
+	public static final int BYTE_SIZE = Byte.SIZE;
 	/**
 	 * Constant for byte size (float)
 	 */
-	public static final float BYTE_SIZE_F = 8.0f;
+	public static final float BYTE_SIZE_F = Byte.SIZE;
 	/**
 	 * Integer size in byte
 	 */
