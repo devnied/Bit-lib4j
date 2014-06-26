@@ -38,6 +38,34 @@ public final class BytesUtilsTest {
 
 		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("00000100"), 2, 1)).isEqualTo(1);
 
+		try {
+			BytesUtils.byteArrayToInt(null);
+			Assert.fail();
+		} catch (Exception e) {
+			Assert.assertTrue(true);
+		}
+
+		try {
+			BytesUtils.byteArrayToInt(null, 2, 2);
+			Assert.fail();
+		} catch (Exception e) {
+			Assert.assertTrue(true);
+		}
+
+		try {
+			BytesUtils.byteArrayToInt(tab, 0, 10);
+			Assert.fail();
+		} catch (Exception e) {
+			Assert.assertTrue(true);
+		}
+
+		try {
+			BytesUtils.byteArrayToInt(tab, 2, 3);
+			Assert.fail();
+		} catch (Exception e) {
+			Assert.assertTrue(true);
+		}
+
 	}
 
 	/**
@@ -94,6 +122,12 @@ public final class BytesUtilsTest {
 		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(0), true)).isEqualTo("");
 		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(Integer.MAX_VALUE), true)).isEqualTo(
 				"7FFFFFFF");
+
+		Assertions.assertThat(BytesUtils.bytesToString(BytesUtils.toByteArray(4608), true)).isEqualTo("12 00");
+		Assertions.assertThat(BytesUtils.bytesToString(BytesUtils.toByteArray(206), true)).isEqualTo("CE");
+		Assertions.assertThat(BytesUtils.bytesToString(BytesUtils.toByteArray(266), true)).isEqualTo("01 0A");
+		Assertions.assertThat(BytesUtils.bytesToString(BytesUtils.toByteArray(0), true)).isEqualTo("");
+		Assertions.assertThat(BytesUtils.bytesToString(BytesUtils.toByteArray(Integer.MAX_VALUE), true)).isEqualTo("7F FF FF FF");
 	}
 
 	@Test(expected = IllegalAccessException.class)
