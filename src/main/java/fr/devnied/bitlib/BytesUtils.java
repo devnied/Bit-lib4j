@@ -80,12 +80,25 @@ public final class BytesUtils {
 	/**
 	 * Method to convert bytes to string with space between bytes
 	 * 
-	 * @param pBytes
-	 *            bytes to convert
+	 * bytes to convert
+	 * 
 	 * @return a string
 	 */
 	public static String bytesToString(final byte[] pBytes) {
-		return formatByte(pBytes, FORMAT_SPACE);
+		return formatByte(pBytes, FORMAT_SPACE, false);
+	}
+
+	/**
+	 * Method to convert bytes to string with space between bytes
+	 * 
+	 * bytes to convert
+	 * 
+	 * @param pTruncate
+	 *            true to remove 0 left byte value
+	 * @return a string
+	 */
+	public static String bytesToString(final byte[] pBytes, final boolean pTruncate) {
+		return formatByte(pBytes, FORMAT_SPACE, pTruncate);
 	}
 
 	/**
@@ -96,7 +109,20 @@ public final class BytesUtils {
 	 * @return a string
 	 */
 	public static String bytesToStringNoSpace(final byte[] pBytes) {
-		return formatByte(pBytes, FORMAT_NOSPACE);
+		return formatByte(pBytes, FORMAT_NOSPACE, false);
+	}
+
+	/**
+	 * Method to convert bytes to string without space between bytes
+	 * 
+	 * @param pBytes
+	 *            bytes to convert
+	 * @param pTruncate
+	 *            true to remove 0 left byte value
+	 * @return a string
+	 */
+	public static String bytesToStringNoSpace(final byte[] pBytes, final boolean pTruncate) {
+		return formatByte(pBytes, FORMAT_NOSPACE, pTruncate);
 	}
 
 	/**
@@ -106,15 +132,21 @@ public final class BytesUtils {
 	 *            the byte to format
 	 * @param pFormat
 	 *            the format
+	 * @param pTruncate
+	 *            true to remove 0 left byte value
 	 * @return a string containing the requested string
 	 */
-	private static String formatByte(final byte[] pByte, final String pFormat) {
+	private static String formatByte(final byte[] pByte, final String pFormat, final boolean pTruncate) {
 		StringBuffer sb = new StringBuffer();
 		if (pByte == null) {
 			sb.append("");
 		} else {
+			boolean t = false;
 			for (byte b : pByte) {
-				sb.append(String.format(pFormat, b & DEFAULT_MASK));
+				if (b != 0 || !pTruncate || t) {
+					t = true;
+					sb.append(String.format(pFormat, b & DEFAULT_MASK));
+				}
 			}
 		}
 		return sb.toString().toUpperCase(Locale.getDefault()).trim();

@@ -83,6 +83,19 @@ public final class BytesUtilsTest {
 		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(tab2)).isEqualTo("00010245");
 	}
 
+	/**
+	 * 
+	 */
+	@Test
+	public void testBytesToStringNoSpaceTruncate() {
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(4608), true)).isEqualTo("1200");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(206), true)).isEqualTo("CE");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(266), true)).isEqualTo("010A");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(0), true)).isEqualTo("");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(Integer.MAX_VALUE), true)).isEqualTo(
+				"7FFFFFFF");
+	}
+
 	@Test(expected = IllegalAccessException.class)
 	public void testConstructorPrivate() throws Exception {
 		BytesUtils.class.newInstance();
