@@ -58,7 +58,7 @@ public final class BytesUtils {
 	 *            start position in array in the
 	 * @param length
 	 *            length of data
-	 * @return
+	 * @return int value of byte array
 	 */
 	public static int byteArrayToInt(final byte[] byteArray, final int startPos, final int length) {
 		if (byteArray == null) {
@@ -99,6 +99,17 @@ public final class BytesUtils {
 	 */
 	public static String bytesToString(final byte[] pBytes, final boolean pTruncate) {
 		return formatByte(pBytes, FORMAT_SPACE, pTruncate);
+	}
+
+	/**
+	 * Method to convert byte to string without space between byte
+	 * 
+	 * @param pByte
+	 *            byte to convert
+	 * @return a string
+	 */
+	public static String bytesToStringNoSpace(final byte pByte) {
+		return formatByte(new byte[] { pByte }, FORMAT_NOSPACE, false);
 	}
 
 	/**
@@ -177,15 +188,18 @@ public final class BytesUtils {
 	}
 
 	/**
-	 * Test if bit at given index of given value is = 1
+	 * Test if bit at given index of given value is = 1.
 	 * 
 	 * @param pVal
 	 *            value to test
 	 * @param pBitIndex
-	 *            bit index
+	 *            bit index between 0 and 7
 	 * @return true bit at given index of give value is = 1
 	 */
 	public static boolean matchBitByBitIndex(final int pVal, final int pBitIndex) {
+		if (pBitIndex < 0 || pBitIndex > 7) {
+			throw new IllegalArgumentException("parameter 'pBitIndex' must be between 0 and 7. pBitIndex=" + pBitIndex);
+		}
 		return (pVal & 1 << pBitIndex) != 0;
 	}
 
@@ -200,6 +214,30 @@ public final class BytesUtils {
 	 */
 	public static boolean matchBitByValue(final int pInitialValue, final int pValueToCompare) {
 		return matchBitByBitIndex(pInitialValue, MAX_BIT_INTEGER - Integer.numberOfLeadingZeros(pValueToCompare));
+	}
+
+	/**
+	 * Method used to set a bit index to 1 or 0.
+	 * 
+	 * @param data
+	 *            data to modify
+	 * @param pBitIndex
+	 *            index to set
+	 * @param pOn
+	 *            set bit at specified index to 1 or 0
+	 * @return the modified byte
+	 */
+	public static byte setBit(final byte pData, final int pBitIndex, final boolean pOn) {
+		if (pBitIndex < 0 || pBitIndex > 7) {
+			throw new IllegalArgumentException("parameter 'pBitIndex' must be between 0 and 7. pBitIndex=" + pBitIndex);
+		}
+		byte ret = pData;
+		if (pOn) { // Set bit
+			ret |= 1 << pBitIndex;
+		} else { // Unset bit
+			ret &= ~(1 << pBitIndex);
+		}
+		return ret;
 	}
 
 	/**
