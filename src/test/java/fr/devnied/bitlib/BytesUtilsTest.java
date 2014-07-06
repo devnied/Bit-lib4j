@@ -115,6 +115,16 @@ public final class BytesUtilsTest {
 	 * 
 	 */
 	@Test
+	public void testBytesToStringNoSpacebyte() {
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace((byte) 0)).isEqualTo("00");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace((byte) 255)).isEqualTo("FF");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(null)).isEqualTo("");
+	}
+
+	/**
+	 * 
+	 */
+	@Test
 	public void testBytesToStringNoSpaceTruncate() {
 		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(4608), true)).isEqualTo("1200");
 		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(206), true)).isEqualTo("CE");
@@ -155,6 +165,53 @@ public final class BytesUtilsTest {
 		Assertions.assertThat(BytesUtils.matchBitByValue(10, 8)).isEqualTo(true);
 		Assertions.assertThat(BytesUtils.matchBitByValue(10, 2)).isEqualTo(true);
 		Assertions.assertThat(BytesUtils.matchBitByValue(10, 1)).isEqualTo(false);
+	}
+
+	/**
+	 * 
+	 */
+	@Test
+	public void testMatchBitByBitIndex() {
+		Assertions.assertThat(BytesUtils.matchBitByBitIndex(1, 0)).isEqualTo(true);
+		Assertions.assertThat(BytesUtils.matchBitByBitIndex(128, 7)).isEqualTo(true);
+		Assertions.assertThat(BytesUtils.matchBitByBitIndex(127, 7)).isEqualTo(false);
+		Assertions.assertThat(BytesUtils.matchBitByBitIndex(255, 7)).isEqualTo(true);
+		Assertions.assertThat(BytesUtils.matchBitByBitIndex(0, 0)).isEqualTo(false);
+
+		try {
+			BytesUtils.matchBitByBitIndex(0, -1);
+			Assert.fail();
+		} catch (Exception e) {
+		}
+		try {
+			BytesUtils.matchBitByBitIndex(0, 8);
+			Assert.fail();
+		} catch (Exception e) {
+		}
+	}
+
+	/**
+	 * 
+	 */
+	@Test
+	public void testSetBytes() {
+		byte max = (byte) 0xFF;
+		byte min = 0;
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.setBit(min, 7, true))).isEqualTo("80");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.setBit(min, 0, true))).isEqualTo("01");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.setBit(max, 4, false))).isEqualTo("EF");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.setBit(max, 0, false))).isEqualTo("FE");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.setBit(min, 0, false))).isEqualTo("00");
+		try {
+			BytesUtils.setBit(max, -1, false);
+			Assert.fail();
+		} catch (Exception e) {
+		}
+		try {
+			BytesUtils.setBit(max, 8, false);
+			Assert.fail();
+		} catch (Exception e) {
+		}
 	}
 
 	/**
