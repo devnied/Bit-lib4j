@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.Locale;
 
 /**
- * Class used to manage String/byte converter
+ * Class used to manage String/byte/int converter
  * 
  * @author Millau Julien
  * 
