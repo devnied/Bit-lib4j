@@ -150,33 +150,15 @@ public final class BytesUtilsTest {
 	 * 
 	 */
 	@Test
-	public void testMatchBit() {
-		Assertions.assertThat(BytesUtils.matchBitByValue(5, 1)).isEqualTo(true);
-		Assertions.assertThat(BytesUtils.matchBitByValue(5, 4)).isEqualTo(true);
-		Assertions.assertThat(BytesUtils.matchBitByValue(5, 8)).isEqualTo(false);
-
-		Assertions.assertThat(BytesUtils.matchBitByValue(2, 2)).isEqualTo(true);
-
-		Assertions.assertThat(BytesUtils.matchBitByValue(15, 1)).isEqualTo(true);
-		Assertions.assertThat(BytesUtils.matchBitByValue(15, 2)).isEqualTo(true);
-		Assertions.assertThat(BytesUtils.matchBitByValue(15, 4)).isEqualTo(true);
-		Assertions.assertThat(BytesUtils.matchBitByValue(15, 8)).isEqualTo(true);
-
-		Assertions.assertThat(BytesUtils.matchBitByValue(10, 8)).isEqualTo(true);
-		Assertions.assertThat(BytesUtils.matchBitByValue(10, 2)).isEqualTo(true);
-		Assertions.assertThat(BytesUtils.matchBitByValue(10, 1)).isEqualTo(false);
-	}
-
-	/**
-	 * 
-	 */
-	@Test
 	public void testMatchBitByBitIndex() {
 		Assertions.assertThat(BytesUtils.matchBitByBitIndex(1, 0)).isEqualTo(true);
 		Assertions.assertThat(BytesUtils.matchBitByBitIndex(128, 7)).isEqualTo(true);
 		Assertions.assertThat(BytesUtils.matchBitByBitIndex(127, 7)).isEqualTo(false);
 		Assertions.assertThat(BytesUtils.matchBitByBitIndex(255, 7)).isEqualTo(true);
 		Assertions.assertThat(BytesUtils.matchBitByBitIndex(0, 0)).isEqualTo(false);
+		Assertions.assertThat(BytesUtils.matchBitByBitIndex(256, 8)).isEqualTo(true);
+		Assertions.assertThat(BytesUtils.matchBitByBitIndex(Integer.MIN_VALUE, 31)).isEqualTo(true);
+		Assertions.assertThat(BytesUtils.matchBitByBitIndex(Integer.MAX_VALUE, 31)).isEqualTo(false);
 
 		try {
 			BytesUtils.matchBitByBitIndex(0, -1);
@@ -184,7 +166,7 @@ public final class BytesUtilsTest {
 		} catch (Exception e) {
 		}
 		try {
-			BytesUtils.matchBitByBitIndex(0, 8);
+			BytesUtils.matchBitByBitIndex(0, 32);
 			Assert.fail();
 		} catch (Exception e) {
 		}

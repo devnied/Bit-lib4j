@@ -193,27 +193,14 @@ public final class BytesUtils {
 	 * @param pVal
 	 *            value to test
 	 * @param pBitIndex
-	 *            bit index between 0 and 7
+	 *            bit index between 0 and 31
 	 * @return true bit at given index of give value is = 1
 	 */
 	public static boolean matchBitByBitIndex(final int pVal, final int pBitIndex) {
-		if (pBitIndex < 0 || pBitIndex > 7) {
-			throw new IllegalArgumentException("parameter 'pBitIndex' must be between 0 and 7. pBitIndex=" + pBitIndex);
+		if (pBitIndex < 0 || pBitIndex > MAX_BIT_INTEGER) {
+			throw new IllegalArgumentException("parameter 'pBitIndex' must be between 0 and 31. pBitIndex=" + pBitIndex);
 		}
 		return (pVal & 1 << pBitIndex) != 0;
-	}
-
-	/**
-	 * Test if both bit representation of initial value and bit representation of value to compare = 1
-	 * 
-	 * @param pInitialValue
-	 *            initial value to compare
-	 * @param pValueToCompare
-	 *            value to compare
-	 * @return true if both bit representation of initial value and bit representation of value to compare = 1
-	 */
-	public static boolean matchBitByValue(final int pInitialValue, final int pValueToCompare) {
-		return matchBitByBitIndex(pInitialValue, MAX_BIT_INTEGER - Integer.numberOfLeadingZeros(pValueToCompare));
 	}
 
 	/**
