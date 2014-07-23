@@ -1,7 +1,7 @@
 Bit-lib4j [![Build Status](https://travis-ci.org/devnied/Bit-lib4j.png?branch=master)](https://travis-ci.org/devnied/Bit-lib4j) [![Coverage Status](https://coveralls.io/repos/devnied/Bit-lib4j/badge.png?branch=master)](https://coveralls.io/r/devnied/Bit-lib4j?branch=master)
 ========
 
-Bit-Lib4j is an useful library to manipulate bits in Java.<br/>
+Bit-Lib4j is an useful library to handle bytes or bits in Java.<br/>
 With this library you can read/write data in a byte array with a custom size for Java primitive types.
 
 <b>Current version : 1.4.10</b> 
@@ -28,6 +28,11 @@ It is very easy to get started with bit-lib4j:
 	// Result
 	bit.getData();                        // return Ox61  (0110 0001b)
 ```
+
+##Handle bytes more easily
+
+The class ByteUtils provided static methods to convert byte array to String, String to byte array, int to byte array, byte array to binary representation.
+
 
 More documentation into the [wiki](https://github.com/devnied/Bit-lib4j/wiki)
 
