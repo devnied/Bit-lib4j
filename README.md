@@ -45,7 +45,7 @@ More documentation into the [wiki](https://github.com/devnied/Bit-lib4j/wiki)
 
 ### JAR
 
-You can download this library on [Maven central](http://search.maven.org/#search%7Cga%7C1%7Cbit-lib4j).
+You can download this library on [Maven central](http://search.maven.org/#search%7Cga%7C1%7Cbit-lib4j) or in Github [release tab](https://github.com/devnied/Bit-lib4j/releases)
 
 ##Dependencies
 
