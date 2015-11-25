@@ -150,7 +150,7 @@ public final class BitUtils {
 	}
 
 	/**
-	 * Method used to get the next byte and shift read data to the beginning of the array.<br/>
+	 * Method used to get the next byte and shift read data to the beginning of the array.<br>
 	 * (Ex 00110000b if we start read 2 bit at index 2 the data returned will be 11000000b)
 	 * 
 	 * @param pSize
@@ -167,7 +167,7 @@ public final class BitUtils {
 	 * @param pSize
 	 *            the size in bit to read
 	 * @param pShift
-	 *            boolean to indicate if the data read will be shift to the left.<br/>
+	 *            boolean to indicate if the data read will be shift to the left.<br>
 	 *            <ul>
 	 *            <li>if true : (Ex 10110000b if we start read 2 bit at index 2 the returned data will be 11000000b)</li>
 	 *            <li>if false : (Ex 10110000b if we start read 2 bit at index 2 the returned data will be 00110000b)</li>
@@ -339,7 +339,7 @@ public final class BitUtils {
 	 * 
 	 * @param pSize
 	 *            the length of the string int bit
-	 * @param pChartset
+	 * @param pCharset
 	 *            the charset
 	 * @return the string
 	 */
@@ -422,6 +422,8 @@ public final class BitUtils {
 	 *            the value to write
 	 * @param pLength
 	 *            the length of the data in bits
+	 * @param pPadBefore
+	 * 			  if true pad with 0
 	 */
 	public void setNextByte(final byte[] pValue, final int pLength, final boolean pPadBefore) {
 		int totalSize = (int) Math.ceil(pLength / BYTE_SIZE_F);
@@ -514,6 +516,9 @@ public final class BitUtils {
 	 * 
 	 * Be careful with java long bit sign
 	 * 
+	 * @param pValue
+	 * 			the value to set
+	 * 
 	 * @param pLength
 	 *            the length of the long
 	 */
@@ -590,7 +595,7 @@ public final class BitUtils {
 	 * 
 	 * @param pValue
 	 *            the string to write
-	 * @param pLenth
+	 * @param pLength
 	 *            the string length
 	 * @param pPaddedBefore
 	 *            indicate if the string is padded before or after

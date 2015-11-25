@@ -80,7 +80,8 @@ public final class BytesUtils {
 	/**
 	 * Method to convert bytes to string with space between bytes
 	 * 
-	 * bytes to convert
+	 * @param pBytes
+	 * 			Bytes to convert
 	 * 
 	 * @return a string
 	 */
@@ -92,7 +93,8 @@ public final class BytesUtils {
 	 * Method to convert bytes to string with space between bytes
 	 * 
 	 * bytes to convert
-	 * 
+	 * @param pBytes
+	 * 			Bytes to convert
 	 * @param pTruncate
 	 *            true to remove 0 left byte value
 	 * @return a string
@@ -206,7 +208,7 @@ public final class BytesUtils {
 	/**
 	 * Method used to set a bit index to 1 or 0.
 	 * 
-	 * @param data
+	 * @param pData
 	 *            data to modify
 	 * @param pBitIndex
 	 *            index to set
