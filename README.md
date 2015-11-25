@@ -4,7 +4,7 @@ Bit-lib4j [![Build Status](https://travis-ci.org/devnied/Bit-lib4j.png?branch=ma
 Bit-Lib4j is an useful library to handle bytes or bits in Java.<br/>
 With this library you can read/write data in a byte array with a custom size for Java primitive types.
 
-<b>Current version : 1.4.11</b> 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.devnied/bit-lib4j/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.github.devnied/bit-lib4j)<br/>
 
 ##Simple API
 
