@@ -518,12 +518,21 @@ public final class BitUtils {
 	 *            the length of the long
 	 */
 	public void setNextLong(final long pValue, final int pLength) {
-		long value = pValue;
 
-		if (pLength > 64) {
-			throw new IllegalArgumentException("Overflow with length > 64");
+		if (pLength > Long.SIZE) {
+			throw new IllegalArgumentException("Long overflow with length > 64");
 		}
 
+		setNextValue(pValue, pLength);
+	}
+	
+	/**
+	 * Add Value to the current position with the specified size
+	 * @param pValue value to add
+	 * @param pLength length of the value
+	 */
+	protected void setNextValue(final long pValue, final int pLength){
+		long value = pValue;
 		// Set to max value if pValue cannot be stored on pLength bits.
 		if (pValue >= 1 << pLength) {
 			value = (1 << pLength) - 1;
@@ -559,11 +568,11 @@ public final class BitUtils {
 	 */
 	public void setNextInteger(final int pValue, final int pLength) {
 
-		if (pLength > 32) {
+		if (pLength > Integer.SIZE) {
 			throw new IllegalArgumentException("Integer overflow with length > 32");
 		}
 
-		setNextLong(pValue, pLength);
+		setNextValue(pValue, pLength);
 	}
 
 	/**
