@@ -293,11 +293,99 @@ public final class BitUtilsTest {
 
 		bit.reset();
 		try {
-			bit.setNextInteger(500, 32);
+			bit.setNextInteger(500, 33);
 			Assert.fail();
 		} catch (IllegalArgumentException iae) {
-
 		}
+	}
+	
+	@Test
+	public void testMaxMinValue(){
+		BitUtils bit = new BitUtils(64);
+		bit.setNextHexaString("FFFFFFFF", 32);
+		bit.reset();
+		Assertions.assertThat(bit.getNextInteger(32)).isEqualTo(-1);
+	}
+
+	
+	
+	/**
+	 * Test the method to set an long
+	 */
+	@Test
+	public void testSetLong() {
+
+		BitUtils bit3 = new BitUtils(128);
+		bit3.setNextLong(10, 6);
+		bit3.setNextLong(23, 12);
+		bit3.setNextLong(5, 8);
+		bit3.setNextLong(930, 16);
+		bit3.setNextLong(5, 3);
+		bit3.setNextLong(159, 8);
+		bit3.setNextLong(7, 3);
+		bit3.reset();
+
+		Assertions.assertThat(bit3.getNextLong(6)).isEqualTo(10);
+		Assertions.assertThat(bit3.getNextLong(12)).isEqualTo(23);
+		Assertions.assertThat(bit3.getNextLong(8)).isEqualTo(5);
+		Assertions.assertThat(bit3.getNextLong(16)).isEqualTo(930);
+		Assertions.assertThat(bit3.getNextLong(3)).isEqualTo(5);
+		Assertions.assertThat(bit3.getNextLong(8)).isEqualTo(159);
+		Assertions.assertThat(bit3.getNextLong(3)).isEqualTo(7);
+
+		BitUtils bit2 = new BitUtils(128);
+		bit2.setNextLong(3, 2);
+		bit2.setNextLong(1057, 14);
+		bit2.setNextLong(1, 1);
+		bit2.setNextLong(1532, 15);
+		bit2.setNextLong(8, 8);
+		bit2.setNextLong(1532, 15);
+
+		bit2.reset();
+
+		Assertions.assertThat(bit2.getNextLong(2)).isEqualTo(3);
+		Assertions.assertThat(bit2.getNextLong(14)).isEqualTo(1057);
+		Assertions.assertThat(bit2.getNextLong(1)).isEqualTo(1);
+		Assertions.assertThat(bit2.getNextLong(15)).isEqualTo(1532);
+		Assertions.assertThat(bit2.getNextLong(8)).isEqualTo(8);
+		Assertions.assertThat(bit2.getNextLong(15)).isEqualTo(1532);
+
+		BitUtils bit = new BitUtils(64);
+		bit.setNextLong(3, 2);
+		bit.setNextLong(255, 8);
+		bit.setNextLong(0, 2);
+		bit.setNextLong(15, 4);
+		bit.setNextLong(2, 2);
+		bit.setNextLong(3, 3);
+		bit.setNextLong(1, 1);
+		bit.setNextLong(0, 1);
+		bit.setNextLong(1, 1);
+		bit.reset();
+
+		Assertions.assertThat(bit.getNextLong(2)).isEqualTo(3);
+		Assertions.assertThat(bit.getNextLong(8)).isEqualTo(255);
+		Assertions.assertThat(bit.getNextLong(2)).isEqualTo(0);
+		Assertions.assertThat(bit.getNextLong(4)).isEqualTo(15);
+		Assertions.assertThat(bit.getNextLong(2)).isEqualTo(2);
+		Assertions.assertThat(bit.getNextLong(3)).isEqualTo(3);
+		Assertions.assertThat(bit.getNextLong(1)).isEqualTo(1);
+		Assertions.assertThat(bit.getNextLong(1)).isEqualTo(0);
+		Assertions.assertThat(bit.getNextLong(1)).isEqualTo(1);
+
+		bit.reset();
+		try {
+			bit.setNextLong(500, 65);
+			Assert.fail();
+		} catch (IllegalArgumentException iae) {
+		}
+	}
+	
+	@Test
+	public void testLongMaxMinValue(){
+		BitUtils bit = new BitUtils(64);
+		bit.setNextHexaString("FFFFFFFFFFFFFFFF", 64);
+		bit.reset();
+		Assertions.assertThat(bit.getNextInteger(64)).isEqualTo(-1);
 	}
 
 	/**

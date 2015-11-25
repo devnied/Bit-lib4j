@@ -29,10 +29,6 @@ public final class BitUtils {
 	 */
 	public static final float BYTE_SIZE_F = Byte.SIZE;
 	/**
-	 * Integer size in byte
-	 */
-	private static final int INTEGER_BYTE_SIZE = 4;
-	/**
 	 * 255 init value
 	 */
 	private static final int DEFAULT_VALUE = 0xFF;
@@ -271,44 +267,60 @@ public final class BitUtils {
 		return BytesUtils.bytesToStringNoSpace(getNextByte(pSize, true));
 	}
 
+
+	/**
+	 * This method is used to get an long with the specified size
+	 * 
+	 * Be careful with java long bit sign
+	 * 
+	 * @param pLength
+	 *            the length of the data to read in bit
+	 * @return an long
+	 */
+	public long getNextLong(final int pLength) {
+			// allocate Size of Integer
+			ByteBuffer buffer = ByteBuffer.allocate(BYTE_SIZE * 2);
+			// final value
+			long finalValue = 0;
+			// Incremental value
+			long currentValue = 0;
+			// Size to read
+			int readSize = pLength;
+			// length max of the index
+			int max = currentBitIndex + pLength;
+			while (currentBitIndex < max) {
+				int mod = currentBitIndex % BYTE_SIZE;
+				// apply the mask to the selected byte
+				currentValue = byteTab[currentBitIndex / BYTE_SIZE] & getMask(mod, readSize) & DEFAULT_VALUE;
+				// Shift right the read value
+				int dec = Math.max(BYTE_SIZE - (mod + readSize), 0);
+				currentValue = (currentValue & DEFAULT_VALUE) >>> dec & DEFAULT_VALUE;
+				// Shift left the previously read value and add the current value
+				finalValue = finalValue << Math.min(readSize, BYTE_SIZE) | currentValue;
+				// calculate read value size
+				int val = BYTE_SIZE - mod;
+				// Decrease the size left
+				readSize = readSize - val;
+				currentBitIndex = Math.min(currentBitIndex + val, max);
+			}
+			buffer.putLong(finalValue);
+			// reset the current bytebuffer index to 0
+			buffer.rewind();
+			// return integer
+			return buffer.getLong();
+	}
+	
 	/**
 	 * This method is used to get an integer with the specified size
+	 * 
+	 * Be careful with java integer bit sign
 	 * 
 	 * @param pLength
 	 *            the length of the data to read in bit
 	 * @return an integer
 	 */
 	public int getNextInteger(final int pLength) {
-		// allocate Size of Integer
-		ByteBuffer buffer = ByteBuffer.allocate(INTEGER_BYTE_SIZE);
-		// final value
-		int finalValue = 0;
-		// Incremental value
-		int currentValue = 0;
-		// Size to read
-		int readSize = pLength;
-		// length max of the index
-		int max = currentBitIndex + pLength;
-		while (currentBitIndex < max) {
-			int mod = currentBitIndex % BYTE_SIZE;
-			// apply the mask to the selected byte
-			currentValue = byteTab[currentBitIndex / BYTE_SIZE] & getMask(mod, readSize) & DEFAULT_VALUE;
-			// Shift right the read value
-			int dec = Math.max(BYTE_SIZE - (mod + readSize), 0);
-			currentValue = (currentValue & DEFAULT_VALUE) >>> dec & DEFAULT_VALUE;
-			// Shift left the previously read value and add the current value
-			finalValue = finalValue << Math.min(readSize, BYTE_SIZE) | currentValue;
-			// calculate read value size
-			int val = BYTE_SIZE - mod;
-			// Decrease the size left
-			readSize = readSize - val;
-			currentBitIndex = Math.min(currentBitIndex + val, max);
-		}
-		buffer.putInt(finalValue);
-		// reset the current bytebuffer index to 0
-		buffer.rewind();
-		// return integer
-		return buffer.getInt();
+		return (int) (getNextLong(pLength));
 	}
 
 	/**
@@ -496,18 +508,20 @@ public final class BitUtils {
 	public void setNextHexaString(final String pValue, final int pLength) {
 		setNextByte(BytesUtils.fromString(pValue), pLength);
 	}
-
+	
 	/**
-	 * Add Integer to the current position with the specified size
+	 * Add Long to the current position with the specified size
+	 * 
+	 * Be careful with java long bit sign
 	 * 
 	 * @param pLength
-	 *            the length of the integer
+	 *            the length of the long
 	 */
-	public void setNextInteger(final int pValue, final int pLength) {
-		int value = pValue;
+	public void setNextLong(final long pValue, final int pLength) {
+		long value = pValue;
 
-		if (pLength > 31) {
-			throw new IllegalArgumentException("Integer overflow with length > 31");
+		if (pLength > 64) {
+			throw new IllegalArgumentException("Overflow with length > 64");
 		}
 
 		// Set to max value if pValue cannot be stored on pLength bits.
@@ -525,14 +539,31 @@ public final class BitUtils {
 				ret = (byte) (value << BYTE_SIZE - (writeSize + mod));
 			} else {
 				// shift right
-				int length = Integer.toBinaryString(value).length();
+				long length = Long.toBinaryString(value).length();
 				ret = (byte) (value >> writeSize - length - (BYTE_SIZE - length - mod));
 			}
 			byteTab[currentBitIndex / BYTE_SIZE] |= ret;
-			int val = Math.min(writeSize, BYTE_SIZE - mod);
+			long val = Math.min(writeSize, BYTE_SIZE - mod);
 			writeSize -= val;
 			currentBitIndex += val;
 		}
+	}
+
+	/**
+	 * Add Integer to the current position with the specified size
+	 * 
+	 * Be careful with java integer bit sign
+	 * 
+	 * @param pLength
+	 *            the length of the integer
+	 */
+	public void setNextInteger(final int pValue, final int pLength) {
+
+		if (pLength > 32) {
+			throw new IllegalArgumentException("Integer overflow with length > 32");
+		}
+
+		setNextLong(pValue, pLength);
 	}
 
 	/**
