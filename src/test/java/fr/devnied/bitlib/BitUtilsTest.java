@@ -291,23 +291,47 @@ public final class BitUtilsTest {
 		Assertions.assertThat(bit.getNextInteger(1)).isEqualTo(0);
 		Assertions.assertThat(bit.getNextInteger(1)).isEqualTo(1);
 
-		bit.reset();
+		bit.clear();
 		try {
 			bit.setNextInteger(500, 33);
 			Assert.fail();
 		} catch (IllegalArgumentException iae) {
 		}
+		bit.clear();
+		bit.setNextInteger(127, 5);
+		bit.reset();
+		Assertions.assertThat(bit.getNextInteger(5)).isEqualTo(31);
 	}
 	
 	@Test
-	public void testMaxMinValue(){
+	public void testOverflowValueInSize() {
 		BitUtils bit = new BitUtils(64);
-		bit.setNextHexaString("FFFFFFFF", 32);
+		bit.setNextInteger(Integer.MAX_VALUE, 3);
 		bit.reset();
-		Assertions.assertThat(bit.getNextInteger(32)).isEqualTo(-1);
+		Assertions.assertThat(bit.getNextInteger(3)).isEqualTo(7);
+		
+		bit.clear();
+		bit.setNextLong(Long.MAX_VALUE, 40);
+		bit.reset();
+		Assertions.assertThat(bit.getNextLong(40)).isEqualTo(1099511627775L);
 	}
-
 	
+	@Test
+	public void testMaxMinValueInteger() {
+		BitUtils bit = new BitUtils(64);
+		bit.setNextInteger(Integer.MIN_VALUE, 32);
+		bit.reset();
+		Assertions.assertThat(bit.getNextHexaString(32)).isEqualTo("80000000");
+		bit.reset();
+		Assertions.assertThat(bit.getNextInteger(32)).isEqualTo(Integer.MIN_VALUE);
+		
+		bit.clear();
+		bit.setNextInteger(Integer.MAX_VALUE, 32);
+		bit.reset();
+		Assertions.assertThat(bit.getNextHexaString(32)).isEqualTo("7FFFFFFF");
+		bit.reset();
+		Assertions.assertThat(bit.getNextInteger(32)).isEqualTo(Integer.MAX_VALUE);
+	}
 	
 	/**
 	 * Test the method to set an long
@@ -378,6 +402,23 @@ public final class BitUtilsTest {
 			Assert.fail();
 		} catch (IllegalArgumentException iae) {
 		}
+	}
+	
+	@Test
+	public void testMaxMinValueLong() {
+		BitUtils bit = new BitUtils(64);
+		bit.setNextLong(Long.MIN_VALUE, 64);
+		bit.reset();
+		Assertions.assertThat(bit.getNextHexaString(64)).isEqualTo("8000000000000000");
+		bit.reset();
+		Assertions.assertThat(bit.getNextLong(64)).isEqualTo(Long.MIN_VALUE);
+		
+		bit.clear();
+		bit.setNextLong(Long.MAX_VALUE, 64);
+		bit.reset();
+		Assertions.assertThat(bit.getNextHexaString(64)).isEqualTo("7FFFFFFFFFFFFFFF");
+		bit.reset();
+		Assertions.assertThat(bit.getNextLong(64)).isEqualTo(Long.MAX_VALUE);
 	}
 	
 	@Test
