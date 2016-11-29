@@ -1,14 +1,17 @@
 package fr.devnied.bitlib;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 import org.fest.assertions.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
  * Class to test the Utils class bytesUtils
- * 
+ *
  * @author Millau Julien
- * 
+ *
  */
 public final class BytesUtilsTest {
 
@@ -22,14 +25,16 @@ public final class BytesUtilsTest {
 	private final byte[] tab2 = new byte[] { 0x00, (byte) 0x01, (byte) 0x02, 0x45 };
 
 	/**
-	 * 
+	 *
 	 */
 	@Test
 	public void testByteArrayToInt() {
 		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("00000000"))).isEqualTo(0);
 		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("00000001"))).isEqualTo(1);
-		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("7FFFFFFF"))).isEqualTo(Integer.MAX_VALUE);
-		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("80000000"))).isEqualTo(Integer.MIN_VALUE);
+		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("7FFFFFFF")))
+				.isEqualTo(Integer.MAX_VALUE);
+		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("80000000")))
+				.isEqualTo(Integer.MIN_VALUE);
 		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("00000100"))).isEqualTo(256);
 		// partial int
 		Assertions.assertThat(BytesUtils.byteArrayToInt(BytesUtils.fromString("0100"))).isEqualTo(256);
@@ -69,7 +74,7 @@ public final class BytesUtilsTest {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	@Test
 	public void testBytesFromString() {
@@ -87,12 +92,13 @@ public final class BytesUtilsTest {
 
 		Assertions.assertThat(BytesUtils.fromString(" 00 54 ")).isEqualTo(new byte[] { 0x00, 0x54 });
 
-		Assertions.assertThat(BytesUtils.fromString("00 54 0A9B")).isEqualTo(new byte[] { 0x00, 0x54, 0x0A, (byte) 0x9B });
+		Assertions.assertThat(BytesUtils.fromString("00 54 0A9B"))
+				.isEqualTo(new byte[] { 0x00, 0x54, 0x0A, (byte) 0x9B });
 		Assertions.assertThat(BytesUtils.fromString("000ABC")).isEqualTo(new byte[] { 0x00, 0x0A, (byte) 0xBC });
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	@Test
 	public void testBytesToString() {
@@ -102,7 +108,7 @@ public final class BytesUtilsTest {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	@Test
 	public void testBytesToStringNoSpace() {
@@ -112,7 +118,7 @@ public final class BytesUtilsTest {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	@Test
 	public void testBytesToStringNoSpacebyte() {
@@ -122,7 +128,7 @@ public final class BytesUtilsTest {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	@Test
 	public void testBytesToStringNoSpaceTruncate() {
@@ -130,14 +136,15 @@ public final class BytesUtilsTest {
 		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(206), true)).isEqualTo("CE");
 		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(266), true)).isEqualTo("010A");
 		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(0), true)).isEqualTo("");
-		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(Integer.MAX_VALUE), true)).isEqualTo(
-				"7FFFFFFF");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(Integer.MAX_VALUE), true))
+				.isEqualTo("7FFFFFFF");
 
 		Assertions.assertThat(BytesUtils.bytesToString(BytesUtils.toByteArray(4608), true)).isEqualTo("12 00");
 		Assertions.assertThat(BytesUtils.bytesToString(BytesUtils.toByteArray(206), true)).isEqualTo("CE");
 		Assertions.assertThat(BytesUtils.bytesToString(BytesUtils.toByteArray(266), true)).isEqualTo("01 0A");
 		Assertions.assertThat(BytesUtils.bytesToString(BytesUtils.toByteArray(0), true)).isEqualTo("");
-		Assertions.assertThat(BytesUtils.bytesToString(BytesUtils.toByteArray(Integer.MAX_VALUE), true)).isEqualTo("7F FF FF FF");
+		Assertions.assertThat(BytesUtils.bytesToString(BytesUtils.toByteArray(Integer.MAX_VALUE), true))
+				.isEqualTo("7F FF FF FF");
 	}
 
 	@Test(expected = IllegalAccessException.class)
@@ -147,7 +154,7 @@ public final class BytesUtilsTest {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	@Test
 	public void testMatchBitByBitIndex() {
@@ -173,7 +180,7 @@ public final class BytesUtilsTest {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	@Test
 	public void testSetBytes() {
@@ -197,27 +204,39 @@ public final class BytesUtilsTest {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	@Test
 	public void testToBinary() {
 		Assertions.assertThat(BytesUtils.toBinary(null)).isEqualTo(null);
 		Assertions.assertThat(BytesUtils.toBinary(new byte[] { 0x44, 0x01 })).isEqualTo("0100010000000001");
-		Assertions.assertThat(BytesUtils.toBinary(new byte[] { 0x00, 0x00, 0x00 })).isEqualTo("000000000000000000000000");
-		Assertions.assertThat(BytesUtils.toBinary(new byte[] { (byte) 0xF0, 0x00, 0x00 })).isEqualTo("111100000000000000000000");
+		Assertions.assertThat(BytesUtils.toBinary(new byte[] { 0x00, 0x00, 0x00 }))
+				.isEqualTo("000000000000000000000000");
+		Assertions.assertThat(BytesUtils.toBinary(new byte[] { (byte) 0xF0, 0x00, 0x00 }))
+				.isEqualTo("111100000000000000000000");
 		Assertions.assertThat(BytesUtils.toBinary(new byte[] { (byte) 0xFF })).isEqualTo("11111111");
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	@Test
 	public void testToByteArray() {
 		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(0))).isEqualTo("00000000");
 		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(1))).isEqualTo("00000001");
-		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(Integer.MAX_VALUE))).isEqualTo("7FFFFFFF");
-		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(Integer.MIN_VALUE))).isEqualTo("80000000");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(Integer.MAX_VALUE)))
+				.isEqualTo("7FFFFFFF");
+		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(Integer.MIN_VALUE)))
+				.isEqualTo("80000000");
 		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(256))).isEqualTo("00000100");
+	}
+
+	@Test
+	public final void privateConstructor() throws NoSuchMethodException, SecurityException, InstantiationException,
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		final Constructor<?> constructor = BytesUtils.class.getDeclaredConstructor();
+		constructor.setAccessible(true);
+		Assertions.assertThat(constructor.newInstance()).isNotNull();
 	}
 
 }
