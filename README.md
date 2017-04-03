@@ -6,7 +6,7 @@ With this library you can read/write data in a byte array with a custom size for
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.devnied/bit-lib4j/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.github.devnied/bit-lib4j)<br/>
 
-##Simple API
+## Simple API
 
 It is very easy to get started with bit-lib4j:
 
@@ -29,7 +29,7 @@ It is very easy to get started with bit-lib4j:
 	bit.getData();                        // return Ox61  (0110 0001b)
 ```
 
-##Handle bytes more easily
+## Handle bytes more easily
 
 The class ByteUtils provided static methods to convert byte array to String, String to byte array, int to byte array, byte array to binary representation.
 
@@ -52,7 +52,7 @@ More documentation into the [wiki](https://github.com/devnied/Bit-lib4j/wiki)
 
 You can download this library on [Maven central](http://search.maven.org/#search%7Cga%7C1%7Cbit-lib4j) or in Github [release tab](https://github.com/devnied/Bit-lib4j/releases)
 
-##Dependencies
+## Dependencies
 
 If you are not using Maven or some other dependency management tool that can understand Maven repositories, the list below is what you need to run bit-lib4j.
 
