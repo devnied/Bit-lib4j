@@ -38,7 +38,7 @@ It is very easy to get started with bit-lib4j:
 	// Result
 	bit.getNextIntegerSigned(4);    // return -2
 ```
-You can also use ```getNextLongSigned()``` to handle long signed values.
+You can also use ```getNextSignedLong()``` to handle long signed values.
 
 
 ## Handle bytes more easily
@@ -56,7 +56,7 @@ More documentation into the [wiki](https://github.com/devnied/Bit-lib4j/wiki)
 <dependency>
   <groupId>com.github.devnied</groupId>
   <artifactId>bit-lib4j</artifactId>
-  <version>1.4.13</version>
+  <version>1.5.0</version>
 </dependency>
 ```
 
