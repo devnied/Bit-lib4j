@@ -1,14 +1,14 @@
 package fr.devnied.bitlib;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class to manage bit with java
@@ -274,9 +274,40 @@ public final class BitUtils {
 	}
 
 	/**
-	 * This method is used to get an long with the specified size
+	 * Method used to get get a signed long with the specified size
+	 * @param pLength length of long to get
+	 * @return the long value
+	 */
+	public long getNextLongSigned(final int pLength) {
+		if (pLength > Long.SIZE) {
+			throw new IllegalArgumentException("Long overflow with length > 64");
+		}
+		long decimal = getNextLong(pLength);
+		long signMask = 1 << pLength - 1;
+
+		if ( (decimal & signMask) != 0) {
+			return - (signMask - (signMask ^ decimal));
+		}
+		return decimal;
+	}
+
+	/**
+	 * Method used to get get a signed integer with the specified size
+	 * @param pLength the length of the integer (must be < to 32)
+	 * @return the integer value
+	 */
+	public int getNextIntegerSigned(final int pLength) {
+		if (pLength > Integer.SIZE) {
+			throw new IllegalArgumentException("Integer overflow with length > 32");
+		}
+		return (int) getNextLongSigned(pLength);
+	}
+
+	/**
+	 * This method is used to get a long with the specified size
 	 * 
-	 * Be careful with java long bit sign
+	 * Be careful with java long bit sign. This method doesn't handle signed values.<br/>
+	 * For that, @see BitUtils.getNextLongSigned()
 	 * 
 	 * @param pLength
 	 *            the length of the data to read in bit
@@ -318,7 +349,8 @@ public final class BitUtils {
 	/**
 	 * This method is used to get an integer with the specified size
 	 * 
-	 * Be careful with java integer bit sign
+	 * Be careful with java integer bit sign. This method doesn't handle signed values.<br/>
+	 * For that, @see BitUtils.getNextIntegerSigned()
 	 * 
 	 * @param pLength
 	 *            the length of the data to read in bit

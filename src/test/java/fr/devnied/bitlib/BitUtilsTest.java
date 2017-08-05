@@ -1,12 +1,12 @@
 package fr.devnied.bitlib;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.fest.assertions.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Class to test the bitutils class
@@ -574,6 +574,63 @@ public final class BitUtilsTest {
 
 		bit = new BitUtils(new byte[] { 0x33, 0x12 });
 		Assertions.assertThat(bit.getSize()).isEqualTo(2 * 8);
+	}
+
+	/**
+	 * Unit test for signed value
+	 */
+	@Test
+	public void testSign() {
+		BitUtils bit = new BitUtils(Long.SIZE);
+		bit.setNextInteger(-2, 4);
+		bit.reset();
+		Assertions.assertThat(bit.getNextIntegerSigned(4)).isEqualTo(-2);
+		bit.clear();
+		bit.setNextInteger(0, 8);
+		bit.reset();
+		Assertions.assertThat(bit.getNextIntegerSigned(8)).isEqualTo(0);
+		bit.clear();
+		bit.setNextInteger(127, 8);
+		bit.reset();
+		Assertions.assertThat(bit.getNextIntegerSigned(8)).isEqualTo(127);
+		bit.clear();
+		bit.setNextInteger(-128, 8);
+		bit.reset();
+		Assertions.assertThat(bit.getNextIntegerSigned(8)).isEqualTo(-128);
+		bit.clear();
+		bit.setNextInteger(-256, 16);
+		bit.reset();
+		Assertions.assertThat(bit.getNextIntegerSigned(16)).isEqualTo(-256);
+		bit.clear();
+		bit.setNextInteger(Integer.MIN_VALUE, Integer.SIZE);
+		bit.reset();
+		Assertions.assertThat(bit.getNextIntegerSigned(Integer.SIZE)).isEqualTo(Integer.MIN_VALUE);
+		bit.clear();
+		bit.setNextLong(Long.MIN_VALUE, Long.SIZE);
+		bit.reset();
+		Assertions.assertThat(bit.getNextLongSigned(Long.SIZE)).isEqualTo(Long.MIN_VALUE);
+	}
+
+	/**
+	 * Unit test for signed value
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void testOverflowIntegerSign() {
+		BitUtils bit = new BitUtils(Integer.SIZE);
+		bit.setNextInteger(-2, 4);
+		bit.reset();
+		Assertions.assertThat(bit.getNextIntegerSigned(33)).isEqualTo(-2);
+	}
+
+	/**
+	 * Unit test for signed value
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void testOverflowLongSign() {
+		BitUtils bit = new BitUtils(Long.SIZE);
+		bit.setNextInteger(-2, 4);
+		bit.reset();
+		Assertions.assertThat(bit.getNextLongSigned(65)).isEqualTo(-2);
 	}
 
 }

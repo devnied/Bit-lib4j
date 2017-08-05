@@ -15,19 +15,31 @@ It is very easy to get started with bit-lib4j:
 ```java
 	byte[] array = new byte[]{0x12,0x25}
 	BitUtils bit = new BitUtils(array);
-	int res = bit.getNextInteger(4);      // read the first 4 bits to an integer
+	int res = bit.getNextInteger(4);        // read the first 4 bits to an integer
 ```
 
 * Create byte array with bit
 
 ```java
 	BitUtils bit = new BitUtils(8);
-	bit.setNextInteger(3,3);			  // set an integer on 3 bits
-	bit.setNextInteger(1,5);		      // set one value on 5 bits
+	bit.setNextInteger(3,3);        // set an integer on 3 bits
+	bit.setNextInteger(1,5);        // set one value on 5 bits
 
 	// Result
-	bit.getData();                        // return Ox61  (0110 0001b)
+	bit.getData();                  // return Ox61  (0110 0001b)
 ```
+
+* Read/write signed values
+
+```java
+	BitUtils bit = new BitUtils(4);
+	bit.setNextInteger(-2 , 4);	    // set an integer () on 3 bits
+
+	// Result
+	bit.getNextIntegerSigned(4);    // return -2
+```
+You can also use ```getNextLongSigned()``` to handle long signed values.
+
 
 ## Handle bytes more easily
 
