@@ -275,7 +275,7 @@ public final class BitUtils {
 
 	/**
 	 * Method used to get get a signed long with the specified size
-	 * @param pLength length of long to get
+	 * @param pLength length of long to get (must be lower than 64)
 	 * @return the long value
 	 */
 	public long getNextLongSigned(final int pLength) {
@@ -293,7 +293,7 @@ public final class BitUtils {
 
 	/**
 	 * Method used to get get a signed integer with the specified size
-	 * @param pLength the length of the integer (must be < to 32)
+	 * @param pLength the length of the integer (must be lower than 32)
 	 * @return the integer value
 	 */
 	public int getNextIntegerSigned(final int pLength) {
