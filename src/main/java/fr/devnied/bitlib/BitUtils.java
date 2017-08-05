@@ -306,7 +306,7 @@ public final class BitUtils {
 	/**
 	 * This method is used to get a long with the specified size
 	 * 
-	 * Be careful with java long bit sign. This method doesn't handle signed values.<br/>
+	 * Be careful with java long bit sign. This method doesn't handle signed values.<br>
 	 * For that, @see BitUtils.getNextLongSigned()
 	 * 
 	 * @param pLength
@@ -349,7 +349,7 @@ public final class BitUtils {
 	/**
 	 * This method is used to get an integer with the specified size
 	 * 
-	 * Be careful with java integer bit sign. This method doesn't handle signed values.<br/>
+	 * Be careful with java integer bit sign. This method doesn't handle signed values.<br>
 	 * For that, @see BitUtils.getNextIntegerSigned()
 	 * 
 	 * @param pLength
