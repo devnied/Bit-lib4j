@@ -56,7 +56,7 @@ More documentation into the [wiki](https://github.com/devnied/Bit-lib4j/wiki)
 <dependency>
   <groupId>com.github.devnied</groupId>
   <artifactId>bit-lib4j</artifactId>
-  <version>1.5.0</version>
+  <version>1.5.1</version>
 </dependency>
 ```
 
@@ -69,7 +69,7 @@ You can download this library on [Maven central](http://search.maven.org/#search
 If you are not using Maven or some other dependency management tool that can understand Maven repositories, the list below is what you need to run bit-lib4j.
 
 **Runtime Dependencies**
-* slf4j-api 1.7.5
+* slf4j-api 1.7.30
 
 ## Bugs
 
@@ -86,7 +86,7 @@ Forks and Pull Requests are also welcome.
 
 ## Copyright and license
 
-Copyright 2013 Millau Julien.
+Copyright 2020 Millau Julien.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this work except in compliance with the License.

@@ -5,19 +5,19 @@
 	<packaging>jar</packaging>
 	<version>1.5.1-SNAPSHOT</version>
 	<name>bit-lib4j</name>
-	
+
 	<parent>
     	<groupId>org.sonatype.oss</groupId>
     	<artifactId>oss-parent</artifactId>
    	 	<version>7</version>
  	</parent>
-	
+
 	<inceptionYear>2013</inceptionYear>
 	<description>
 	 Useful library to manipulate bits in Java.
 	 Read and write data in a byte array with a custom size for Java types
 	</description>
-	
+
 	<url>https://github.com/devnied/Bit-lib4j/</url>
 	<developers>
 		<developer>
@@ -44,10 +44,10 @@
 	    <tag>HEAD</tag>
   </scm>
 
-  
+
 	<properties>
 		<!-- slf4j -->
-		<slf4j.version>1.7.5</slf4j.version>
+		<slf4j.version>1.7.30</slf4j.version>
 	</properties>
 
 	<dependencies>
@@ -63,20 +63,19 @@
 			<version>${slf4j.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.13.1</version>
 			<scope>test</scope>
 		</dependency>
-            
-		
+
 		<!-- Unit test -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>4.13</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -86,7 +85,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
+
 	<distributionManagement>
 		<snapshotRepository>
 			<id>sonatype-nexus-snapshots</id>
@@ -99,13 +98,13 @@
 			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
 		</repository>
 	</distributionManagement>
-	
+
 	<build>
 		<defaultGoal>install</defaultGoal>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.0</version>
+				<version>3.8.1</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
@@ -115,7 +114,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.6</version>
+				<version>3.1.0</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
 				</configuration>
@@ -123,7 +122,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<version>2.4</version>
+				<version>2.5.3</version>
 				<configuration>
 					<mavenExecutorId>forked-path</mavenExecutorId>
 					<localCheckout>true</localCheckout>
@@ -131,7 +130,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>2.2.1</version>
+				<version>3.2.1</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -149,7 +148,7 @@
 			<plugin>
 			    <groupId>org.codehaus.mojo</groupId>
 			    <artifactId>cobertura-maven-plugin</artifactId>
-			    <version>2.6</version>
+			    <version>2.7</version>
 			    <configuration>
 			        <format>xml</format>
 			        <maxmem>256m</maxmem>
@@ -188,5 +187,5 @@
 			</build>
 		</profile>
 	</profiles>
-	
+
 </project>

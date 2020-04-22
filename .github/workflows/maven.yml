@@ -20,7 +20,7 @@ jobs:
       with:
         java-version: ${{ matrix.java }}
     - name: Build with Maven
-      run: mvn clean package
+      run: mvn -B clean package
 
   finish:
     needs: build
@@ -32,4 +32,4 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
-      run: mvn clean cobertura:cobertura coveralls:report
+      run: mvn -B clean cobertura:cobertura coveralls:report -DrepoToken=${{ secrets.GITHUB_TOKEN }}
