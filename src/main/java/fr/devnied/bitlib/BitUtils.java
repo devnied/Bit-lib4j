@@ -3,6 +3,7 @@ package fr.devnied.bitlib;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
@@ -12,9 +13,9 @@ import java.util.Date;
 
 /**
  * Class to manage bit with java
- * 
+ *
  * @author Millau Julien
- * 
+ *
  */
 public final class BitUtils {
 	/***
@@ -60,7 +61,7 @@ public final class BitUtils {
 
 	/**
 	 * Constructor of the class
-	 * 
+	 *
 	 * @param pByte
 	 *            byte read
 	 */
@@ -72,7 +73,7 @@ public final class BitUtils {
 
 	/**
 	 * Constructor for empty byte tab
-	 * 
+	 *
 	 * @param pSize
 	 *            the size of the tab in bit
 	 */
@@ -83,7 +84,7 @@ public final class BitUtils {
 
 	/**
 	 * Add pIndex to the current value of bitIndex
-	 * 
+	 *
 	 * @param pIndex
 	 *            the value to add to bitIndex
 	 */
@@ -96,7 +97,7 @@ public final class BitUtils {
 
 	/**
 	 * Getter for the currentBitIndex
-	 * 
+	 *
 	 * @return the currentBitIndex
 	 */
 	public int getCurrentBitIndex() {
@@ -105,7 +106,7 @@ public final class BitUtils {
 
 	/**
 	 * Method to get all data
-	 * 
+	 *
 	 * @return a byte tab which contain all data
 	 */
 	public byte[] getData() {
@@ -116,7 +117,7 @@ public final class BitUtils {
 
 	/**
 	 * This method is used to get a mask dynamically
-	 * 
+	 *
 	 * @param pIndex
 	 *            start index of the mask
 	 * @param pLength
@@ -139,7 +140,7 @@ public final class BitUtils {
 
 	/**
 	 * Get the Next boolean (read 1 bit)
-	 * 
+	 *
 	 * @return true or false
 	 */
 	public boolean getNextBoolean() {
@@ -155,7 +156,7 @@ public final class BitUtils {
 	 * the array.<br>
 	 * (Ex 00110000b if we start read 2 bit at index 2 the data returned will be
 	 * 11000000b)
-	 * 
+	 *
 	 * @param pSize
 	 *            the size in bit to read
 	 * @return the byte array read
@@ -166,7 +167,7 @@ public final class BitUtils {
 
 	/**
 	 * Method to get The next bytes with the specified size
-	 * 
+	 *
 	 * @param pSize
 	 *            the size in bit to read
 	 * @param pShift
@@ -220,7 +221,7 @@ public final class BitUtils {
 
 	/**
 	 * Method to get the next date
-	 * 
+	 *
 	 * @param pSize
 	 *            the size of the string date in bit
 	 * @param pPattern
@@ -233,7 +234,7 @@ public final class BitUtils {
 
 	/**
 	 * Method to get the next date
-	 * 
+	 *
 	 * @param pSize
 	 *            the size of the string date in bit
 	 * @param pPattern
@@ -264,7 +265,7 @@ public final class BitUtils {
 
 	/**
 	 * This method is used to get the next String in Hexa
-	 * 
+	 *
 	 * @param pSize
 	 *            the length of the string in bit
 	 * @return the string
@@ -305,10 +306,10 @@ public final class BitUtils {
 
 	/**
 	 * This method is used to get a long with the specified size
-	 * 
+	 *
 	 * Be careful with java long bit sign. This method doesn't handle signed values.<br>
 	 * For that, @see BitUtils.getNextLongSigned()
-	 * 
+	 *
 	 * @param pLength
 	 *            the length of the data to read in bit
 	 * @return an long
@@ -341,17 +342,17 @@ public final class BitUtils {
 		}
 		buffer.putLong(finalValue);
 		// reset the current bytebuffer index to 0
-		buffer.rewind();
+		((Buffer)buffer).rewind();
 		// return integer
 		return buffer.getLong();
 	}
 
 	/**
 	 * This method is used to get an integer with the specified size
-	 * 
+	 *
 	 * Be careful with java integer bit sign. This method doesn't handle signed values.<br>
 	 * For that, @see BitUtils.getNextIntegerSigned()
-	 * 
+	 *
 	 * @param pLength
 	 *            the length of the data to read in bit
 	 * @return an integer
@@ -363,7 +364,7 @@ public final class BitUtils {
 	/**
 	 * This method is used to get the next String with the specified size with
 	 * the charset ASCII
-	 * 
+	 *
 	 * @param pSize
 	 *            the length of the string in bit
 	 * @return the string
@@ -374,7 +375,7 @@ public final class BitUtils {
 
 	/**
 	 * This method is used to get the next String with the specified size
-	 * 
+	 *
 	 * @param pSize
 	 *            the length of the string int bit
 	 * @param pCharset
@@ -387,7 +388,7 @@ public final class BitUtils {
 
 	/**
 	 * Method used to get the size of the bit array
-	 * 
+	 *
 	 * @return the size in bits of the current bit array
 	 */
 	public int getSize() {
@@ -411,7 +412,7 @@ public final class BitUtils {
 
 	/**
 	 * Set to 0 the next N bits
-	 * 
+	 *
 	 * @param pLength
 	 *            the number of bit to set at 0
 	 */
@@ -427,7 +428,7 @@ public final class BitUtils {
 
 	/**
 	 * Setter currentBitIndex
-	 * 
+	 *
 	 * @param pCurrentBitIndex
 	 *            the currentBitIndex to set
 	 */
@@ -437,7 +438,7 @@ public final class BitUtils {
 
 	/**
 	 * Method to set a boolean
-	 * 
+	 *
 	 * @param pBoolean
 	 *            the boolean to set
 	 */
@@ -451,7 +452,7 @@ public final class BitUtils {
 
 	/**
 	 * Method to write bytes with the max length
-	 * 
+	 *
 	 * @param pValue
 	 *            the value to write
 	 * @param pLength
@@ -463,7 +464,7 @@ public final class BitUtils {
 
 	/**
 	 * Method to write bytes with the max length
-	 * 
+	 *
 	 * @param pValue
 	 *            the value to write
 	 * @param pLength
@@ -513,7 +514,7 @@ public final class BitUtils {
 
 	/**
 	 * Method to write a date
-	 * 
+	 *
 	 * @param pValue
 	 *            the value to write
 	 * @param pPattern
@@ -525,7 +526,7 @@ public final class BitUtils {
 
 	/**
 	 * Method to write a date
-	 * 
+	 *
 	 * @param pValue
 	 *            the value to write
 	 * @param pPattern
@@ -547,7 +548,7 @@ public final class BitUtils {
 
 	/**
 	 * Method to write Hexa String with the max length
-	 * 
+	 *
 	 * @param pValue
 	 *            the value to write
 	 * @param pLength
@@ -559,12 +560,12 @@ public final class BitUtils {
 
 	/**
 	 * Add Long to the current position with the specified size
-	 * 
+	 *
 	 * Be careful with java long bit sign
-	 * 
+	 *
 	 * @param pValue
 	 *            the value to set
-	 * 
+	 *
 	 * @param pLength
 	 *            the length of the long
 	 */
@@ -579,7 +580,7 @@ public final class BitUtils {
 
 	/**
 	 * Add Value to the current position with the specified size
-	 * 
+	 *
 	 * @param pValue
 	 *            value to add
 	 * @param pLength
@@ -617,12 +618,12 @@ public final class BitUtils {
 
 	/**
 	 * Add Integer to the current position with the specified size
-	 * 
+	 *
 	 * Be careful with java integer bit sign
-	 * 
+	 *
 	 * @param pValue
 	 *            the value to set
-	 * 
+	 *
 	 * @param pLength
 	 *            the length of the integer
 	 */
@@ -637,10 +638,10 @@ public final class BitUtils {
 
 	/**
 	 * Method to write String
-	 * 
+	 *
 	 * @param pValue
 	 *            the string to write
-	 * 
+	 *
 	 * @param pLength
 	 *            the length of the integer
 	 */
@@ -650,7 +651,7 @@ public final class BitUtils {
 
 	/**
 	 * Method to write a String
-	 * 
+	 *
 	 * @param pValue
 	 *            the string to write
 	 * @param pLength
