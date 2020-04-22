@@ -32,8 +32,4 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
-      run: mvn clean cobertura:cobertura
-    - name: Coveralls GitHub Action
-      uses: coverallsapp/github-action@v1.1.0
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+      run: mvn clean cobertura:cobertura coveralls:report
