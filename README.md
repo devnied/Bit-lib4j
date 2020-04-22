@@ -1,10 +1,8 @@
-Bit-lib4j [![Build Status](https://travis-ci.org/devnied/Bit-lib4j.png?branch=master)](https://travis-ci.org/devnied/Bit-lib4j) [![Coverage Status](https://coveralls.io/repos/devnied/Bit-lib4j/badge.png?branch=master)](https://coveralls.io/r/devnied/Bit-lib4j?branch=master)
+Bit-lib4j ![Bit-lib4j CI](https://github.com/devnied/Bit-lib4j/workflows/Bit-lib4j%20CI/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/devnied/Bit-lib4j/badge.svg?branch=master)](https://coveralls.io/github/devnied/Bit-lib4j?branch=master) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.devnied/bit-lib4j/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.github.devnied/bit-lib4j)
 ========
 
 Bit-Lib4j is an useful library to handle bytes or bits in Java.<br/>
 With this library you can read/write data in a byte array with a custom size for Java primitive types.
-
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.devnied/bit-lib4j/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.github.devnied/bit-lib4j)<br/>
 
 ## Simple API
 

@@ -32,4 +32,4 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
-      run: mvn -B clean cobertura:cobertura coveralls:report -DrepoToken=${{ secrets.GITHUB_TOKEN }}
+      run: mvn -B clean cobertura:cobertura coveralls:report -DrepoToken=${{ secrets.COVERALLS_TOKEN }}
