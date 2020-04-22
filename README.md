@@ -54,7 +54,7 @@ More documentation into the [wiki](https://github.com/devnied/Bit-lib4j/wiki)
 <dependency>
   <groupId>com.github.devnied</groupId>
   <artifactId>bit-lib4j</artifactId>
-  <version>1.5.1</version>
+  <version>1.5.2</version>
 </dependency>
 ```
 
