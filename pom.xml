@@ -3,7 +3,7 @@
 	<groupId>com.github.devnied</groupId>
 	<artifactId>bit-lib4j</artifactId>
 	<packaging>jar</packaging>
-	<version>1.5.2</version>
+	<version>1.5.3-SNAPSHOT</version>
 	<name>bit-lib4j</name>
 
 	<parent>
@@ -41,7 +41,7 @@
     	<connection>scm:git:git@github.com:devnied/Bit-lib4j.git</connection>
     	<developerConnection>scm:git:git@github.com:devnied/Bit-lib4j.git</developerConnection>
     	<url>scm:git:git@github.com:devnied/Bit-lib4j.git</url>
-	    <tag>bit-lib4j-1.5.2</tag>
+	    <tag>HEAD</tag>
   </scm>
 
 
