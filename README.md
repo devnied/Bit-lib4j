@@ -31,7 +31,7 @@ It is very easy to get started with bit-lib4j:
 
 ```java
 	BitUtils bit = new BitUtils(4);
-	bit.setNextInteger(-2 , 4);	    // set an integer (-2) on 3 bits
+	bit.setNextInteger(-2 , 4);	    // set an integer (-2) on 4 bits
 
 	// Result
 	bit.getNextIntegerSigned(4);    // return -2
