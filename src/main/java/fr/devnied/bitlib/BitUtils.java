@@ -65,7 +65,7 @@ public final class BitUtils {
 	 * @param pByte
 	 *            byte read
 	 */
-	public BitUtils(final byte pByte[]) {
+	public BitUtils(final byte[] pByte) {
 		byteTab = new byte[pByte.length];
 		System.arraycopy(pByte, 0, byteTab, 0, pByte.length);
 		size = pByte.length * BYTE_SIZE;
@@ -144,11 +144,7 @@ public final class BitUtils {
 	 * @return true or false
 	 */
 	public boolean getNextBoolean() {
-		boolean ret = false;
-		if (getNextInteger(1) == 1) {
-			ret = true;
-		}
-		return ret;
+		return getNextInteger(1) == 1;
 	}
 
 	/**
@@ -284,7 +280,7 @@ public final class BitUtils {
 			throw new IllegalArgumentException("Long overflow with length > 64");
 		}
 		long decimal = getNextLong(pLength);
-		long signMask = 1 << pLength - 1;
+		long signMask = 1L << pLength - 1;
 
 		if ( (decimal & signMask) != 0) {
 			return - (signMask - (signMask ^ decimal));
@@ -487,7 +483,7 @@ public final class BitUtils {
 				buffer.put((byte) 0);
 			}
 		}
-		byte tab[] = buffer.array();
+		byte[] tab = buffer.array();
 		if (currentBitIndex % BYTE_SIZE != 0) {
 			int index = 0;
 			int max = currentBitIndex + pLength;
@@ -588,7 +584,7 @@ public final class BitUtils {
 	 * @param pMaxSize
 	 *            max size in bits
 	 */
-	protected void setNextValue(final long pValue, final int pLength, final int pMaxSize) {
+	private void setNextValue(final long pValue, final int pLength, final int pMaxSize) {
 		long value = pValue;
 		// Set to max value if pValue cannot be stored on pLength bits.
 		long bitMax = (long) Math.pow(2, Math.min(pLength, pMaxSize));
