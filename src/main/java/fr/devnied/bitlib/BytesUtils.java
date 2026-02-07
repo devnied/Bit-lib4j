@@ -1,7 +1,5 @@
 package fr.devnied.bitlib;
 
-import java.math.BigInteger;
-
 /**
  * Class used to manage String/byte/int converter
  *
@@ -285,11 +283,11 @@ public final class BytesUtils {
 	public static String toBinary(final byte[] pBytes) {
 		String ret = null;
 		if (pBytes != null && pBytes.length > 0) {
-			BigInteger val = new BigInteger(bytesToStringNoSpace(pBytes), HEXA);
-			StringBuilder build = new StringBuilder(val.toString(2));
-			// left pad with 0 to fit byte size
-			for (int i = build.length(); i < pBytes.length * BitUtils.BYTE_SIZE; i++) {
-				build.insert(0, 0);
+			StringBuilder build = new StringBuilder(pBytes.length * BitUtils.BYTE_SIZE);
+			for (byte b : pBytes) {
+				for (int i = 7; i >= 0; i--) {
+					build.append((b >> i) & 1);
+				}
 			}
 			ret = build.toString();
 		}

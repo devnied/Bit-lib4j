@@ -4,6 +4,7 @@ import org.fest.assertions.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -422,6 +423,22 @@ public final class BitUtilsTest {
 	}
 	
 	@Test
+	public void testSetLong64BitsSmallValue() {
+		BitUtils bit = new BitUtils(64);
+		bit.setNextLong(42, 64);
+		bit.reset();
+		Assertions.assertThat(bit.getNextLong(64)).isEqualTo(42);
+		bit.clear();
+		bit.setNextLong(0, 64);
+		bit.reset();
+		Assertions.assertThat(bit.getNextLong(64)).isEqualTo(0);
+		bit.clear();
+		bit.setNextLong(1, 64);
+		bit.reset();
+		Assertions.assertThat(bit.getNextLong(64)).isEqualTo(1);
+	}
+
+	@Test
 	public void testLongMaxMinValue(){
 		BitUtils bit = new BitUtils(64);
 		bit.setNextHexaString("FFFFFFFFFFFFFFFF", 64);
@@ -609,6 +626,95 @@ public final class BitUtilsTest {
 		bit.setNextLong(Long.MIN_VALUE, Long.SIZE);
 		bit.reset();
 		Assertions.assertThat(bit.getNextLongSigned(Long.SIZE)).isEqualTo(Long.MIN_VALUE);
+	}
+
+	/**
+	 * Unit test for getNextString with custom charset
+	 */
+	@Test
+	public void testGetNextStringWithCharset() {
+		String val = "Héllo";
+		byte[] utf8Bytes = val.getBytes(StandardCharsets.UTF_8);
+		BitUtils bit = new BitUtils(utf8Bytes);
+		Assertions.assertThat(bit.getNextString(utf8Bytes.length * 8, StandardCharsets.UTF_8)).isEqualTo(val);
+	}
+
+	/**
+	 * Unit test for signed long values
+	 */
+	@Test
+	public void testSignedLong() {
+		BitUtils bit = new BitUtils(Long.SIZE);
+		bit.setNextLong(-2, 40);
+		bit.reset();
+		Assertions.assertThat(bit.getNextLongSigned(40)).isEqualTo(-2);
+		bit.clear();
+		bit.setNextLong(-128, 40);
+		bit.reset();
+		Assertions.assertThat(bit.getNextLongSigned(40)).isEqualTo(-128);
+		bit.clear();
+		bit.setNextLong(0, 40);
+		bit.reset();
+		Assertions.assertThat(bit.getNextLongSigned(40)).isEqualTo(0);
+		bit.clear();
+		bit.setNextLong(Long.MAX_VALUE, Long.SIZE);
+		bit.reset();
+		Assertions.assertThat(bit.getNextLongSigned(Long.SIZE)).isEqualTo(Long.MAX_VALUE);
+	}
+
+	/**
+	 * Unit test for boundary clamping: value == 2^n should be clamped to 2^n - 1
+	 */
+	@Test
+	public void testBoundaryClampingExactPowerOfTwo() {
+		// 256 on 8 bits: max storable unsigned = 255, so 256 should be clamped to 255
+		BitUtils bit = new BitUtils(32);
+		bit.setNextInteger(256, 8);
+		bit.reset();
+		Assertions.assertThat(bit.getNextInteger(8)).isEqualTo(255);
+
+		// 4 on 2 bits: max storable = 3, so 4 should be clamped to 3
+		bit.clear();
+		bit.setNextInteger(4, 2);
+		bit.reset();
+		Assertions.assertThat(bit.getNextInteger(2)).isEqualTo(3);
+
+		// 8 on 3 bits: max storable = 7, so 8 should be clamped to 7
+		bit.clear();
+		bit.setNextInteger(8, 3);
+		bit.reset();
+		Assertions.assertThat(bit.getNextInteger(3)).isEqualTo(7);
+
+		// 2 on 1 bit: max storable = 1, so 2 should be clamped to 1
+		bit.clear();
+		bit.setNextInteger(2, 1);
+		bit.reset();
+		Assertions.assertThat(bit.getNextInteger(1)).isEqualTo(1);
+
+		// 65536 on 16 bits: max storable = 65535
+		bit.clear();
+		bit.setNextInteger(65536, 16);
+		bit.reset();
+		Assertions.assertThat(bit.getNextInteger(16)).isEqualTo(65535);
+	}
+
+	/**
+	 * Unit test for boundary clamping with long values
+	 */
+	@Test
+	public void testBoundaryClampingLong() {
+		// 1L << 40 on 40 bits: should be clamped to (1L << 40) - 1
+		BitUtils bit = new BitUtils(64);
+		long maxOn40Bits = (1L << 40) - 1;
+		bit.setNextLong(1L << 40, 40);
+		bit.reset();
+		Assertions.assertThat(bit.getNextLong(40)).isEqualTo(maxOn40Bits);
+
+		// Value just below the boundary should pass through unchanged
+		bit.clear();
+		bit.setNextLong(maxOn40Bits, 40);
+		bit.reset();
+		Assertions.assertThat(bit.getNextLong(40)).isEqualTo(maxOn40Bits);
 	}
 
 	/**

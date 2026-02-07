@@ -3,8 +3,6 @@ package fr.devnied.bitlib;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,10 +24,6 @@ public final class BitUtils {
 	 * Constant for byte size
 	 */
 	public static final int BYTE_SIZE = Byte.SIZE;
-	/**
-	 * Constant for byte size (float)
-	 */
-	public static final float BYTE_SIZE_F = Byte.SIZE;
 	/**
 	 * 255 init value
 	 */
@@ -66,8 +60,7 @@ public final class BitUtils {
 	 *            byte read
 	 */
 	public BitUtils(final byte[] pByte) {
-		byteTab = new byte[pByte.length];
-		System.arraycopy(pByte, 0, byteTab, 0, pByte.length);
+		byteTab = Arrays.copyOf(pByte, pByte.length);
 		size = pByte.length * BYTE_SIZE;
 	}
 
@@ -78,7 +71,7 @@ public final class BitUtils {
 	 *            the size of the tab in bit
 	 */
 	public BitUtils(final int pSize) {
-		byteTab = new byte[(int) Math.ceil(pSize / BYTE_SIZE_F)];
+		byteTab = new byte[(pSize + BYTE_SIZE - 1) / BYTE_SIZE];
 		size = pSize;
 	}
 
@@ -110,9 +103,7 @@ public final class BitUtils {
 	 * @return a byte tab which contain all data
 	 */
 	public byte[] getData() {
-		byte[] ret = new byte[byteTab.length];
-		System.arraycopy(byteTab, 0, ret, 0, byteTab.length);
-		return ret;
+		return Arrays.copyOf(byteTab, byteTab.length);
 	}
 
 	/**
@@ -178,7 +169,7 @@ public final class BitUtils {
 	 * @return a byte array
 	 */
 	public byte[] getNextByte(final int pSize, final boolean pShift) {
-		byte[] tab = new byte[(int) Math.ceil(pSize / BYTE_SIZE_F)];
+		byte[] tab = new byte[(pSize + BYTE_SIZE - 1) / BYTE_SIZE];
 
 		if (currentBitIndex % BYTE_SIZE != 0) {
 			int index = 0;
@@ -311,36 +302,21 @@ public final class BitUtils {
 	 * @return an long
 	 */
 	public long getNextLong(final int pLength) {
-		// allocate Size of Integer
-		ByteBuffer buffer = ByteBuffer.allocate(BYTE_SIZE * 2);
-		// final value
 		long finalValue = 0;
-		// Incremental value
-		long currentValue = 0;
-		// Size to read
+		long currentValue;
 		int readSize = pLength;
-		// length max of the index
 		int max = currentBitIndex + pLength;
 		while (currentBitIndex < max) {
 			int mod = currentBitIndex % BYTE_SIZE;
-			// apply the mask to the selected byte
 			currentValue = byteTab[currentBitIndex / BYTE_SIZE] & getMask(mod, readSize) & DEFAULT_VALUE;
-			// Shift right the read value
 			int dec = Math.max(BYTE_SIZE - (mod + readSize), 0);
 			currentValue = (currentValue & DEFAULT_VALUE) >>> dec & DEFAULT_VALUE;
-			// Shift left the previously read value and add the current value
 			finalValue = finalValue << Math.min(readSize, BYTE_SIZE) | currentValue;
-			// calculate read value size
 			int val = BYTE_SIZE - mod;
-			// Decrease the size left
 			readSize = readSize - val;
 			currentBitIndex = Math.min(currentBitIndex + val, max);
 		}
-		buffer.putLong(finalValue);
-		// reset the current bytebuffer index to 0
-		((Buffer)buffer).rewind();
-		// return integer
-		return buffer.getLong();
+		return finalValue;
 	}
 
 	/**
@@ -469,21 +445,11 @@ public final class BitUtils {
 	 *            if true pad with 0
 	 */
 	public void setNextByte(final byte[] pValue, final int pLength, final boolean pPadBefore) {
-		int totalSize = (int) Math.ceil(pLength / BYTE_SIZE_F);
-		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
-		int size = Math.max(totalSize - pValue.length, 0);
-		if (pPadBefore) {
-			for (int i = 0; i < size; i++) {
-				buffer.put((byte) 0);
-			}
-		}
-		buffer.put(pValue, 0, Math.min(totalSize, pValue.length));
-		if (!pPadBefore) {
-			for (int i = 0; i < size; i++) {
-				buffer.put((byte) 0);
-			}
-		}
-		byte[] tab = buffer.array();
+		int totalSize = (pLength + BYTE_SIZE - 1) / BYTE_SIZE;
+		byte[] tab = new byte[totalSize];
+		int padSize = Math.max(totalSize - pValue.length, 0);
+		int copyLen = Math.min(totalSize, pValue.length);
+		System.arraycopy(pValue, 0, tab, pPadBefore ? padSize : 0, copyLen);
 		if (currentBitIndex % BYTE_SIZE != 0) {
 			int index = 0;
 			int max = currentBitIndex + pLength;
@@ -587,22 +553,18 @@ public final class BitUtils {
 	private void setNextValue(final long pValue, final int pLength, final int pMaxSize) {
 		long value = pValue;
 		// Set to max value if pValue cannot be stored on pLength bits.
-		long bitMax = (long) Math.pow(2, Math.min(pLength, pMaxSize));
-		if (pValue > bitMax) {
+		long bitMax = 1L << Math.min(pLength, pMaxSize);
+		if (bitMax > 0 && pValue >= bitMax) {
 			value = bitMax - 1;
 		}
-		// size to wrote
 		int writeSize = pLength;
 		while (writeSize > 0) {
-			// modulo
 			int mod = currentBitIndex % BYTE_SIZE;
-			byte ret = 0;
+			byte ret;
 			if (mod == 0 && writeSize <= BYTE_SIZE || pLength < BYTE_SIZE - mod) {
-				// shift left value
 				ret = (byte) (value << BYTE_SIZE - (writeSize + mod));
 			} else {
-				// shift right
-				long length = Long.toBinaryString(value).length();
+				int length = value == 0 ? 1 : Long.SIZE - Long.numberOfLeadingZeros(value);
 				ret = (byte) (value >> writeSize - length - (BYTE_SIZE - length - mod));
 			}
 			byteTab[currentBitIndex / BYTE_SIZE] |= ret;
@@ -656,6 +618,6 @@ public final class BitUtils {
 	 *            indicate if the string is padded before or after
 	 */
 	public void setNextString(final String pValue, final int pLength, final boolean pPaddedBefore) {
-		setNextByte(pValue.getBytes(Charset.defaultCharset()), pLength, pPaddedBefore);
+		setNextByte(pValue.getBytes(DEFAULT_CHARSET), pLength, pPaddedBefore);
 	}
 }

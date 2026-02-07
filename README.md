@@ -1,4 +1,4 @@
-Bit-lib4j ![Bit-lib4j CI](https://github.com/devnied/Bit-lib4j/workflows/Bit-lib4j%20CI/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/devnied/Bit-lib4j/badge.svg?branch=master)](https://coveralls.io/github/devnied/Bit-lib4j?branch=master) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.devnied/bit-lib4j/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.github.devnied/bit-lib4j)
+Bit-lib4j ![Bit-lib4j CI](https://github.com/devnied/Bit-lib4j/workflows/Bit-lib4j%20CI/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/devnied/Bit-lib4j/badge.svg?branch=master)](https://coveralls.io/github/devnied/Bit-lib4j?branch=master)
 ========
 
 Bit-Lib4j is an useful library to handle bytes or bits in Java.<br/>
@@ -36,7 +36,7 @@ It is very easy to get started with bit-lib4j:
 	// Result
 	bit.getNextIntegerSigned(4);    // return -2
 ```
-You can also use ```getNextSignedLong()``` to handle long signed values.
+You can also use ```getNextLongSigned()``` to handle long signed values.
 
 
 ## Handle bytes more easily
@@ -67,7 +67,7 @@ You can download this library on [Maven central](http://search.maven.org/#search
 If you are not using Maven or some other dependency management tool that can understand Maven repositories, the list below is what you need to run bit-lib4j.
 
 **Runtime Dependencies**
-* slf4j-api 1.7.30
+* slf4j-api 1.7.36
 
 ## Bugs
 
@@ -78,13 +78,13 @@ Forks and Pull Requests are also welcome.
 
 **Millau Julien**
 
-+ [http://twitter.com/devnied](http://twitter.com/devnied)
++ [http://x.com/devnied](http://x.com/devnied)
 + [http://github.com/devnied](http://github.com/devnied)
 
 
 ## Copyright and license
 
-Copyright 2020 Millau Julien.
+Copyright 2026 Millau Julien.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this work except in compliance with the License.
@@ -97,5 +97,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-[![Analytics](https://ga-beacon.appspot.com/UA-19411627-5/Bit-lib4j/index)](https://github.com/igrigorik/ga-beacon)

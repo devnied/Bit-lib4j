@@ -1,11 +1,11 @@
 package fr.devnied.bitlib;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 import org.fest.assertions.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Class to test the Utils class bytesUtils
@@ -229,6 +229,26 @@ public final class BytesUtilsTest {
 		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(Integer.MIN_VALUE)))
 				.isEqualTo("80000000");
 		Assertions.assertThat(BytesUtils.bytesToStringNoSpace(BytesUtils.toByteArray(256))).isEqualTo("00000100");
+	}
+
+	@Test
+	public void testToBinaryEmptyArray() {
+		Assertions.assertThat(BytesUtils.toBinary(new byte[] {})).isEqualTo(null);
+	}
+
+	@Test
+	public void testFromStringEmpty() {
+		Assertions.assertThat(BytesUtils.fromString("")).isEqualTo(new byte[] {});
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testByteArrayToIntNegativeStartPos() {
+		BytesUtils.byteArrayToInt(new byte[] { 0x01, 0x02 }, -1, 1);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testByteArrayToIntZeroLength() {
+		BytesUtils.byteArrayToInt(new byte[] { 0x01, 0x02 }, 0, 0);
 	}
 
 	@Test
