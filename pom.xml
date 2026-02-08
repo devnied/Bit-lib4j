@@ -3,7 +3,7 @@
 	<groupId>com.github.devnied</groupId>
 	<artifactId>bit-lib4j</artifactId>
 	<packaging>jar</packaging>
-	<version>1.6.1-SNAPSHOT</version>
+	<version>1.5.3-SNAPSHOT</version>
 	<name>bit-lib4j</name>
 
 	<parent>
@@ -41,7 +41,7 @@
     	<connection>scm:git:git@github.com:devnied/Bit-lib4j.git</connection>
     	<developerConnection>scm:git:git@github.com:devnied/Bit-lib4j.git</developerConnection>
     	<url>scm:git:git@github.com:devnied/Bit-lib4j.git</url>
-	    <tag>bit-lib4j-1.6.0</tag>
+	    <tag>HEAD</tag>
   </scm>
 
 
@@ -86,22 +86,18 @@
 		</dependency>
 	</dependencies>
 
-	<distributionManagement>
-		<snapshotRepository>
-			<id>sonatype-nexus-snapshots</id>
-			<name>Sonatype Nexus Snapshots</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>sonatype-nexus-staging</id>
-			<name>Nexus Release Repository</name>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-		</repository>
-	</distributionManagement>
-
 	<build>
 		<defaultGoal>install</defaultGoal>
 		<plugins>
+					<plugin>
+        				<groupId>org.sonatype.central</groupId>
+        				<artifactId>central-publishing-maven-plugin</artifactId>
+        				<version>0.9.0</version>
+        				<extensions>true</extensions>
+        				<configuration>
+        					<publishingServerId>central</publishingServerId>
+        				</configuration>
+        			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.15.0</version>
@@ -157,24 +153,7 @@
 					<check />
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.11.2</version>
-				<configuration>
-					<source>1.8</source>
-					<encoding>UTF-8</encoding>
-					<!-- liens externes désactivés pour éviter les erreurs de récupération -->
-				</configuration>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+
 		</plugins>
 	</build>
 	<profiles>
