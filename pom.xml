@@ -3,7 +3,7 @@
 	<groupId>com.github.devnied</groupId>
 	<artifactId>bit-lib4j</artifactId>
 	<packaging>jar</packaging>
-	<version>1.6.0</version>
+	<version>1.6.1-SNAPSHOT</version>
 	<name>bit-lib4j</name>
 
 	<parent>
