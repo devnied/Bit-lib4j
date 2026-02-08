@@ -3,7 +3,7 @@
 	<groupId>com.github.devnied</groupId>
 	<artifactId>bit-lib4j</artifactId>
 	<packaging>jar</packaging>
-	<version>1.5.3-SNAPSHOT</version>
+	<version>1.6.0</version>
 	<name>bit-lib4j</name>
 
 	<parent>
@@ -41,7 +41,7 @@
     	<connection>scm:git:git@github.com:devnied/Bit-lib4j.git</connection>
     	<developerConnection>scm:git:git@github.com:devnied/Bit-lib4j.git</developerConnection>
     	<url>scm:git:git@github.com:devnied/Bit-lib4j.git</url>
-	    <tag>HEAD</tag>
+	    <tag>bit-lib4j-1.6.0</tag>
   </scm>
 
 
@@ -153,7 +153,23 @@
 					<check />
 				</configuration>
 			</plugin>
-
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.11.2</version>
+				<configuration>
+					<source>1.8</source>
+					<encoding>UTF-8</encoding>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 	<profiles>
