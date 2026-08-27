@@ -8,6 +8,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class to manage bit with java
@@ -29,7 +31,16 @@ public final class BitUtils {
 	 */
 	private static final int DEFAULT_VALUE = 0xFF;
 	/**
-	 * Constant for the default charset
+	 * Mask used to compute {@code index % BYTE_SIZE} (bit offset inside a byte)
+	 */
+	private static final int BIT_MASK = BYTE_SIZE - 1;
+	/**
+	 * Shift used to compute {@code index / BYTE_SIZE} (byte index)
+	 */
+	private static final int BYTE_SHIFT = 3;
+	/**
+	 * Constant for the default charset (Charset.forName is used instead of
+	 * StandardCharsets to stay compatible with Android API level lower than 19)
 	 */
 	private static final Charset DEFAULT_CHARSET = Charset.forName("ASCII");
 
@@ -37,6 +48,25 @@ public final class BitUtils {
 	 * Simple date format (yyyMMdd)
 	 */
 	public static final String DATE_FORMAT = "yyyyMMdd";
+
+	/**
+	 * Max number of date formatters kept per thread (safeguard against
+	 * unbounded growth with dynamic patterns)
+	 */
+	private static final int MAX_CACHED_DATE_FORMATS = 32;
+
+	/**
+	 * Per-thread cache of date formatters, keyed by pattern.<br>
+	 * {@link SimpleDateFormat} is expensive to build and not thread safe, so each
+	 * thread keeps its own instances. A formatter captures the default time zone
+	 * and locale of the thread at its first use with a given pattern.
+	 */
+	private static final ThreadLocal<Map<String, SimpleDateFormat>> DATE_FORMAT_CACHE = new ThreadLocal<Map<String, SimpleDateFormat>>() {
+		@Override
+		protected Map<String, SimpleDateFormat> initialValue() {
+			return new HashMap<String, SimpleDateFormat>();
+		}
+	};
 
 	/**
 	 * Table of read byte
@@ -107,6 +137,25 @@ public final class BitUtils {
 	}
 
 	/**
+	 * Compute a byte mask (as an int between 0 and 0xFF) with the bits
+	 * [pIndex, pIndex + pLength) set (bit 0 being the most significant bit).
+	 *
+	 * @param pIndex
+	 *            start index of the mask
+	 * @param pLength
+	 *            size of mask
+	 * @return the mask as an int (0..0xFF)
+	 */
+	private static int mask(final int pIndex, final int pLength) {
+		int ret = DEFAULT_VALUE >>> pIndex;
+		int dec = BYTE_SIZE - (pLength + pIndex);
+		if (dec > 0) {
+			ret &= DEFAULT_VALUE << dec;
+		}
+		return ret;
+	}
+
+	/**
 	 * This method is used to get a mask dynamically
 	 *
 	 * @param pIndex
@@ -116,17 +165,7 @@ public final class BitUtils {
 	 * @return the mask in byte
 	 */
 	public byte getMask(final int pIndex, final int pLength) {
-		byte ret = (byte) DEFAULT_VALUE;
-		// Add X 0 to the left
-		ret = (byte) (ret << pIndex);
-		ret = (byte) ((ret & DEFAULT_VALUE) >> pIndex);
-		// Add X 0 to the right
-		int dec = BYTE_SIZE - (pLength + pIndex);
-		if (dec > 0) {
-			ret = (byte) (ret >> dec);
-			ret = (byte) (ret << dec);
-		}
-		return ret;
+		return (byte) mask(pIndex, pLength);
 	}
 
 	/**
@@ -135,7 +174,10 @@ public final class BitUtils {
 	 * @return true or false
 	 */
 	public boolean getNextBoolean() {
-		return getNextInteger(1) == 1;
+		final int index = currentBitIndex;
+		final boolean ret = (byteTab[index >> BYTE_SHIFT] >> (BIT_MASK - (index & BIT_MASK)) & 1) != 0;
+		currentBitIndex = index + 1;
+		return ret;
 	}
 
 	/**
@@ -169,41 +211,106 @@ public final class BitUtils {
 	 * @return a byte array
 	 */
 	public byte[] getNextByte(final int pSize, final boolean pShift) {
-		byte[] tab = new byte[(pSize + BYTE_SIZE - 1) / BYTE_SIZE];
-
-		if (currentBitIndex % BYTE_SIZE != 0) {
-			int index = 0;
-			int max = currentBitIndex + pSize;
-			while (currentBitIndex < max) {
-				int mod = currentBitIndex % BYTE_SIZE;
-				int modTab = index % BYTE_SIZE;
-				int length = Math.min(max - currentBitIndex, Math.min(BYTE_SIZE - mod, BYTE_SIZE - modTab));
-				byte val = (byte) (byteTab[currentBitIndex / BYTE_SIZE] & getMask(mod, length));
-				if (pShift || pSize % BYTE_SIZE == 0) {
-					if (mod != 0) {
-						val = (byte) (val << Math.min(mod, BYTE_SIZE - length));
-					} else {
-						val = (byte) ((val & DEFAULT_VALUE) >> modTab);
-					}
-				}
-				tab[index / BYTE_SIZE] |= val;
-				currentBitIndex += length;
-				index += length;
-			}
-			if (!pShift && pSize % BYTE_SIZE != 0) {
-				tab[tab.length - 1] = (byte) (tab[tab.length - 1] & getMask((max - pSize - 1) % BYTE_SIZE, BYTE_SIZE));
-			}
-		} else {
-			System.arraycopy(byteTab, currentBitIndex / BYTE_SIZE, tab, 0, tab.length);
-			int val = pSize % BYTE_SIZE;
-			if (val == 0) {
-				val = BYTE_SIZE;
-			}
-			tab[tab.length - 1] = (byte) (tab[tab.length - 1] & getMask(currentBitIndex % BYTE_SIZE, val));
-			currentBitIndex += pSize;
+		final int nbBytes = (pSize + BYTE_SIZE - 1) / BYTE_SIZE;
+		final byte[] tab = new byte[nbBytes];
+		if (nbBytes == 0) {
+			return tab;
 		}
-
+		final int start = currentBitIndex;
+		final int rem = pSize & BIT_MASK;
+		if ((start & BIT_MASK) == 0) {
+			// Aligned read: bulk copy, then clear the unused trailing bits
+			System.arraycopy(byteTab, start >> BYTE_SHIFT, tab, 0, nbBytes);
+			if (rem != 0) {
+				tab[nbBytes - 1] &= DEFAULT_VALUE << BYTE_SIZE - rem;
+			}
+		} else if (pShift || rem == 0) {
+			readShifted(tab, start, pSize);
+		} else {
+			readUnshifted(tab, start, pSize);
+		}
+		currentBitIndex = start + pSize;
 		return tab;
+	}
+
+	/**
+	 * Unaligned read with data shifted to the beginning of the array: each
+	 * output byte is a sliding window over two consecutive source bytes.
+	 *
+	 * @param pTab
+	 *            destination array (already sized)
+	 * @param pStart
+	 *            start bit index (not byte aligned)
+	 * @param pSize
+	 *            the size in bit to read
+	 */
+	private void readShifted(final byte[] pTab, final int pStart, final int pSize) {
+		final int end = pStart + pSize;
+		final int mod = pStart & BIT_MASK;
+		final int rightShift = BYTE_SIZE - mod;
+		final int nbBytes = pTab.length;
+		int k = pStart >> BYTE_SHIFT;
+		for (int i = 0; i < nbBytes; i++, k++) {
+			int val = (byteTab[k] & DEFAULT_VALUE) << mod;
+			if ((k + 1) << BYTE_SHIFT < end) {
+				val |= (byteTab[k + 1] & DEFAULT_VALUE) >>> rightShift;
+			}
+			pTab[i] = (byte) val;
+		}
+		final int rem = pSize & BIT_MASK;
+		if (rem != 0) {
+			pTab[nbBytes - 1] &= DEFAULT_VALUE << BYTE_SIZE - rem;
+		}
+	}
+
+	/**
+	 * Unaligned read without shift: bits keep their position inside the byte
+	 * (low part of source byte k, high part of source byte k + 1).
+	 *
+	 * @param pTab
+	 *            destination array (already sized)
+	 * @param pStart
+	 *            start bit index (not byte aligned)
+	 * @param pSize
+	 *            the size in bit to read
+	 */
+	private void readUnshifted(final byte[] pTab, final int pStart, final int pSize) {
+		final int end = pStart + pSize;
+		final int mod = pStart & BIT_MASK;
+		final int available = BYTE_SIZE - mod;
+		final int nbBytes = pTab.length;
+		int k = pStart >> BYTE_SHIFT;
+		for (int i = 0; i < nbBytes; i++, k++) {
+			int remaining = end - (k << BYTE_SHIFT) - mod;
+			int length = Math.min(remaining, available);
+			int val = byteTab[k] & mask(mod, length);
+			remaining -= length;
+			if (remaining > 0) {
+				val |= byteTab[k + 1] & DEFAULT_VALUE << BYTE_SIZE - Math.min(remaining, mod);
+			}
+			pTab[i] = (byte) val;
+		}
+		pTab[nbBytes - 1] &= DEFAULT_VALUE >>> mod - 1;
+	}
+
+	/**
+	 * Get the (cached, per-thread) date formatter for the given pattern
+	 *
+	 * @param pPattern
+	 *            the Date pattern
+	 * @return a date formatter, never shared between threads
+	 */
+	private static SimpleDateFormat getDateFormat(final String pPattern) {
+		Map<String, SimpleDateFormat> cache = DATE_FORMAT_CACHE.get();
+		SimpleDateFormat sdf = cache.get(pPattern);
+		if (sdf == null) {
+			sdf = new SimpleDateFormat(pPattern);
+			if (cache.size() >= MAX_CACHED_DATE_FORMATS) {
+				cache.clear();
+			}
+			cache.put(pPattern, sdf);
+		}
+		return sdf;
 	}
 
 	/**
@@ -232,10 +339,10 @@ public final class BitUtils {
 	 */
 	public Date getNextDate(final int pSize, final String pPattern, final boolean pUseBcd) {
 		Date date = null;
-		// create date formatter
-		SimpleDateFormat sdf = new SimpleDateFormat(pPattern);
+		// get date formatter
+		SimpleDateFormat sdf = getDateFormat(pPattern);
 		// get String
-		String dateTxt = null;
+		String dateTxt;
 		if (pUseBcd) {
 			dateTxt = getNextHexaString(pSize);
 		} else {
@@ -258,7 +365,35 @@ public final class BitUtils {
 	 * @return the string
 	 */
 	public String getNextHexaString(final int pSize) {
-		return BytesUtils.bytesToStringNoSpace(getNextByte(pSize, true));
+		final int nbBytes = (pSize + BYTE_SIZE - 1) / BYTE_SIZE;
+		if (nbBytes <= 0) {
+			return "";
+		}
+		// Same read as getNextByte(pSize, true), but the hexa chars are produced
+		// directly from the internal buffer (no intermediate byte array)
+		final int start = currentBitIndex;
+		final int end = start + pSize;
+		final int mod = start & BIT_MASK;
+		final int rem = pSize & BIT_MASK;
+		final int rightShift = BYTE_SIZE - mod;
+		final int last = nbBytes - 1;
+		final char[] chars = new char[nbBytes << 1];
+		int k = start >> BYTE_SHIFT;
+		int j = 0;
+		for (int i = 0; i < nbBytes; i++, k++) {
+			int val = (byteTab[k] & DEFAULT_VALUE) << mod;
+			if (mod != 0 && (k + 1) << BYTE_SHIFT < end) {
+				val |= (byteTab[k + 1] & DEFAULT_VALUE) >>> rightShift;
+			}
+			if (i == last && rem != 0) {
+				val &= DEFAULT_VALUE << BYTE_SIZE - rem;
+			}
+			val &= DEFAULT_VALUE;
+			chars[j++] = BytesUtils.HEX_DIGITS[val >>> 4];
+			chars[j++] = BytesUtils.HEX_DIGITS[val & 0xF];
+		}
+		currentBitIndex = end;
+		return new String(chars);
 	}
 
 	/**
@@ -303,19 +438,18 @@ public final class BitUtils {
 	 */
 	public long getNextLong(final int pLength) {
 		long finalValue = 0;
-		long currentValue;
-		int readSize = pLength;
-		int max = currentBitIndex + pLength;
-		while (currentBitIndex < max) {
-			int mod = currentBitIndex % BYTE_SIZE;
-			currentValue = byteTab[currentBitIndex / BYTE_SIZE] & getMask(mod, readSize) & DEFAULT_VALUE;
-			int dec = Math.max(BYTE_SIZE - (mod + readSize), 0);
-			currentValue = (currentValue & DEFAULT_VALUE) >>> dec & DEFAULT_VALUE;
-			finalValue = finalValue << Math.min(readSize, BYTE_SIZE) | currentValue;
-			int val = BYTE_SIZE - mod;
-			readSize = readSize - val;
-			currentBitIndex = Math.min(currentBitIndex + val, max);
+		int index = currentBitIndex;
+		int remaining = pLength;
+		while (remaining > 0) {
+			int mod = index & BIT_MASK;
+			int available = BYTE_SIZE - mod;
+			int take = remaining < available ? remaining : available;
+			int chunk = (byteTab[index >> BYTE_SHIFT] & DEFAULT_VALUE) >>> available - take & (1 << take) - 1;
+			finalValue = finalValue << take | chunk;
+			remaining -= take;
+			index += take;
 		}
+		currentBitIndex = index;
 		return finalValue;
 	}
 
@@ -355,6 +489,18 @@ public final class BitUtils {
 	 * @return the string
 	 */
 	public String getNextString(final int pSize, final Charset pCharset) {
+		final int start = currentBitIndex;
+		if (((start | pSize) & BIT_MASK) == 0 && pSize > 0) {
+			// Aligned read of whole bytes: decode directly from the internal
+			// buffer (no intermediate byte array)
+			final int offset = start >> BYTE_SHIFT;
+			final int nbBytes = pSize >> BYTE_SHIFT;
+			if (offset + nbBytes > byteTab.length) {
+				throw new ArrayIndexOutOfBoundsException(offset + nbBytes);
+			}
+			currentBitIndex = start + pSize;
+			return new String(byteTab, offset, nbBytes, pCharset);
+		}
 		return new String(getNextByte(pSize, true), pCharset);
 	}
 
@@ -389,13 +535,33 @@ public final class BitUtils {
 	 *            the number of bit to set at 0
 	 */
 	public void resetNextBits(final int pLength) {
-		int max = currentBitIndex + pLength;
-		while (currentBitIndex < max) {
-			int mod = currentBitIndex % BYTE_SIZE;
-			int length = Math.min(max - currentBitIndex, BYTE_SIZE - mod);
-			byteTab[currentBitIndex / BYTE_SIZE] &= ~getMask(mod, length);
-			currentBitIndex += length;
+		if (pLength <= 0) {
+			return;
 		}
+		int index = currentBitIndex;
+		final int end = index + pLength;
+		int k = index >> BYTE_SHIFT;
+		final int mod = index & BIT_MASK;
+		if (mod != 0) {
+			// Partial first byte
+			int length = Math.min(end - index, BYTE_SIZE - mod);
+			byteTab[k] &= ~mask(mod, length);
+			index += length;
+			k++;
+		}
+		// Full bytes
+		final int fullBytes = end - index >> BYTE_SHIFT;
+		if (fullBytes > 0) {
+			Arrays.fill(byteTab, k, k + fullBytes, (byte) 0);
+			k += fullBytes;
+			index += fullBytes << BYTE_SHIFT;
+		}
+		// Partial last byte
+		final int rest = end - index;
+		if (rest > 0) {
+			byteTab[k] &= DEFAULT_VALUE >>> rest;
+		}
+		currentBitIndex = end;
 	}
 
 	/**
@@ -415,11 +581,9 @@ public final class BitUtils {
 	 *            the boolean to set
 	 */
 	public void setNextBoolean(final boolean pBoolean) {
-		if (pBoolean) {
-			setNextInteger(1, 1);
-		} else {
-			setNextInteger(0, 1);
-		}
+		final int index = currentBitIndex;
+		byteTab[index >> BYTE_SHIFT] |= pBoolean ? 0x80 >>> (index & BIT_MASK) : 0;
+		currentBitIndex = index + 1;
 	}
 
 	/**
@@ -445,33 +609,48 @@ public final class BitUtils {
 	 *            if true pad with 0
 	 */
 	public void setNextByte(final byte[] pValue, final int pLength, final boolean pPadBefore) {
-		int totalSize = (pLength + BYTE_SIZE - 1) / BYTE_SIZE;
-		byte[] tab = new byte[totalSize];
-		int padSize = Math.max(totalSize - pValue.length, 0);
-		int copyLen = Math.min(totalSize, pValue.length);
-		System.arraycopy(pValue, 0, tab, pPadBefore ? padSize : 0, copyLen);
-		if (currentBitIndex % BYTE_SIZE != 0) {
-			int index = 0;
-			int max = currentBitIndex + pLength;
-			while (currentBitIndex < max) {
-				int mod = currentBitIndex % BYTE_SIZE;
-				int modTab = index % BYTE_SIZE;
-				int length = Math.min(max - currentBitIndex, Math.min(BYTE_SIZE - mod, BYTE_SIZE - modTab));
-				byte val = (byte) (tab[index / BYTE_SIZE] & getMask(modTab, length));
-				if (mod == 0) {
-					val = (byte) (val << Math.min(modTab, BYTE_SIZE - length));
-				} else {
-					val = (byte) ((val & DEFAULT_VALUE) >> mod);
-				}
-				byteTab[currentBitIndex / BYTE_SIZE] |= val;
-				currentBitIndex += length;
-				index += length;
-			}
-
+		final int totalSize = (pLength + BYTE_SIZE - 1) / BYTE_SIZE;
+		final byte[] src;
+		if (pValue.length >= totalSize) {
+			// No padding needed: read directly from the input (only the first
+			// totalSize bytes are used)
+			src = pValue;
 		} else {
-			System.arraycopy(tab, 0, byteTab, currentBitIndex / BYTE_SIZE, tab.length);
-			currentBitIndex += pLength;
+			src = new byte[totalSize];
+			System.arraycopy(pValue, 0, src, pPadBefore ? totalSize - pValue.length : 0, pValue.length);
 		}
+		final int start = currentBitIndex;
+		final int mod = start & BIT_MASK;
+		int k = start >> BYTE_SHIFT;
+		if (mod == 0) {
+			final int rem = pLength & BIT_MASK;
+			if (rem == 0 || totalSize <= 0) {
+				System.arraycopy(src, 0, byteTab, k, totalSize);
+			} else {
+				System.arraycopy(src, 0, byteTab, k, totalSize - 1);
+				// Last partial byte: write only the 'rem' first bits and keep
+				// the bits located after the field untouched
+				final int m = DEFAULT_VALUE << BYTE_SIZE - rem;
+				final int last = k + totalSize - 1;
+				byteTab[last] = (byte) (byteTab[last] & ~m | src[totalSize - 1] & m);
+			}
+		} else {
+			final int end = start + pLength;
+			final int leftShift = BYTE_SIZE - mod;
+			for (int i = 0; i < totalSize; i++, k++) {
+				int val = src[i] & DEFAULT_VALUE;
+				int bits = end - (k << BYTE_SHIFT) - mod;
+				if (bits < BYTE_SIZE) {
+					// Last byte: keep only the top 'bits' bits
+					val &= DEFAULT_VALUE << BYTE_SIZE - bits;
+				}
+				byteTab[k] |= val >>> mod;
+				if ((k + 1) << BYTE_SHIFT < end) {
+					byteTab[k + 1] |= val << leftShift;
+				}
+			}
+		}
+		currentBitIndex = start + pLength;
 	}
 
 	/**
@@ -497,9 +676,8 @@ public final class BitUtils {
 	 *            write date as BCD (binary coded decimal)
 	 */
 	public void setNextDate(final Date pValue, final String pPattern, final boolean pUseBcd) {
-		// create date formatter
-		SimpleDateFormat sdf = new SimpleDateFormat(pPattern);
-		String value = sdf.format(pValue);
+		// get date formatter
+		String value = getDateFormat(pPattern).format(pValue);
 
 		if (pUseBcd) {
 			setNextHexaString(value, value.length() * 4);
@@ -557,21 +735,25 @@ public final class BitUtils {
 		if (bitMax > 0 && pValue >= bitMax) {
 			value = bitMax - 1;
 		}
+		// Keep only the pLength low bits (two's complement for negative values)
+		// so that the sign extension cannot corrupt the bits located before the
+		// current position when the write is not byte aligned.
+		if (pLength < Long.SIZE) {
+			value &= (1L << pLength) - 1;
+		}
+		int index = currentBitIndex;
 		int writeSize = pLength;
 		while (writeSize > 0) {
-			int mod = currentBitIndex % BYTE_SIZE;
-			byte ret;
-			if (mod == 0 && writeSize <= BYTE_SIZE || pLength < BYTE_SIZE - mod) {
-				ret = (byte) (value << BYTE_SIZE - (writeSize + mod));
-			} else {
-				int length = value == 0 ? 1 : Long.SIZE - Long.numberOfLeadingZeros(value);
-				ret = (byte) (value >> writeSize - length - (BYTE_SIZE - length - mod));
-			}
-			byteTab[currentBitIndex / BYTE_SIZE] |= ret;
-			long val = Math.min(writeSize, BYTE_SIZE - mod);
-			writeSize -= val;
-			currentBitIndex += val;
+			int mod = index & BIT_MASK;
+			// Align the 'writeSize' remaining bits of the value on the current
+			// bit position: bits above the byte are dropped by the byte cast
+			int shift = writeSize + mod - BYTE_SIZE;
+			byteTab[index >> BYTE_SHIFT] |= shift >= 0 ? value >>> shift : value << -shift;
+			int written = Math.min(writeSize, BYTE_SIZE - mod);
+			writeSize -= written;
+			index += written;
 		}
+		currentBitIndex = index;
 	}
 
 	/**

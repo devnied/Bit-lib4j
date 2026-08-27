@@ -1,5 +1,7 @@
 package fr.devnied.bitlib;
 
+import java.util.Arrays;
+
 /**
  * Class used to manage String/byte/int converter
  *
@@ -19,41 +21,49 @@ public final class BytesUtils {
 	private static final int HEXA = 16;
 
 	/**
-	 * Byte left mask
-	 */
-	private static final int LEFT_MASK = 0xF0;
-
-	/**
 	 * Byte right mask
 	 */
 	private static final int RIGHT_MASK = 0xF;
 
 	/**
-	 * Char digit 0 (0x30) :<br>
-	 * <ul>
-	 * <li>char 0 = 0x30 + 0x0
-	 * <li>char 1 = 0x30 + 0x1
-	 * <li>...
-	 * <li>char 9 = 0x30 + 0x9
-	 * </ul>
+	 * Byte mask
 	 */
-	private static final int CHAR_DIGIT_ZERO = 0x30;
+	private static final int BYTE_MASK = 0xFF;
 
 	/**
-	 * Char digit 7 (0x37) :<br>
-	 * <ul>
-	 * <li>char A = 0x37 + 0xA
-	 * <li>char B = 0x37 + 0xB
-	 * <li>...
-	 * <li>char F = 0x37 + 0xF
-	 * </ul>
+	 * Hexa digits lookup table (upper case). Package private: shared with
+	 * {@link BitUtils#getNextHexaString(int)}, must not be modified.
 	 */
-	private static final int CHAR_DIGIT_SEVEN = 0x37;
+	static final char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
+			'E', 'F' };
 
 	/**
 	 * Char space
 	 */
 	private static final char CHAR_SPACE = (char) 0x20;
+
+	/**
+	 * Char digit 0
+	 */
+	private static final char CHAR_DIGIT_ZERO = '0';
+
+	/**
+	 * Marker returned by the hexa decode table for whitespace chars
+	 */
+	private static final byte WHITESPACE = -2;
+
+	/**
+	 * ASCII decode table for {@link #fromString(String)}: hexa digit value,
+	 * {@link #WHITESPACE} for whitespaces (see {@link Character#isWhitespace(char)})
+	 * or -1 for invalid chars (same as {@link Character#digit(char, int)})
+	 */
+	private static final byte[] HEX_DECODE_TABLE = new byte[128];
+
+	static {
+		for (int c = 0; c < HEX_DECODE_TABLE.length; c++) {
+			HEX_DECODE_TABLE[c] = Character.isWhitespace((char) c) ? WHITESPACE : (byte) Character.digit((char) c, HEXA);
+		}
+	}
 
 	/**
 	 * Method used to convert byte array to int
@@ -92,7 +102,7 @@ public final class BytesUtils {
 		}
 		int value = 0;
 		for (int i = 0; i < length; i++) {
-			value += (byteArray[startPos + i] & 0xFF) << 8 * (length - i - 1);
+			value = value << BitUtils.BYTE_SIZE | byteArray[startPos + i] & BYTE_MASK;
 		}
 		return value;
 	}
@@ -132,7 +142,8 @@ public final class BytesUtils {
 	 * @return a string
 	 */
 	public static String bytesToStringNoSpace(final byte pByte) {
-		return formatByte(new byte[] { pByte }, false, false);
+		final int b = pByte & BYTE_MASK;
+		return new String(new char[] { HEX_DIGITS[b >>> 4], HEX_DIGITS[b & RIGHT_MASK] });
 	}
 
 	/**
@@ -171,65 +182,100 @@ public final class BytesUtils {
 	 * @return a string containing the requested string
 	 */
 	private static String formatByte(final byte[] pByte, final boolean pSpace, final boolean pTruncate) {
-		String result;
 		if (pByte == null) {
-			result = "";
-		} else {
-			int i = 0;
-			if (pTruncate) {
-				while (i < pByte.length && pByte[i] == 0) {
-					i++;
-				}
-			}
-			if (i < pByte.length) {
-				int sizeMultiplier = pSpace ? 3 : 2;
-				char[] c = new char[(pByte.length - i) * sizeMultiplier];
-				byte b;
-				for (int j = 0; i < pByte.length; i++, j++) {
-					b = (byte) ((pByte[i] & LEFT_MASK) >> 4);
-					c[j] = (char) (b > 9 ? b + CHAR_DIGIT_SEVEN : b + CHAR_DIGIT_ZERO);
-					b = (byte) (pByte[i] & RIGHT_MASK);
-					c[++j] = (char) (b > 9 ? b + CHAR_DIGIT_SEVEN : b + CHAR_DIGIT_ZERO);
-					if (pSpace) {
-						c[++j] = CHAR_SPACE;
-					}
-				}
-				result = pSpace ? new String(c, 0, c.length - 1) : new String(c);
-			} else {
-				result = "";
+			return "";
+		}
+		final int length = pByte.length;
+		int i = 0;
+		if (pTruncate) {
+			while (i < length && pByte[i] == 0) {
+				i++;
 			}
 		}
-		return result;
+		if (i >= length) {
+			return "";
+		}
+		final int count = length - i;
+		final char[] c;
+		int j = 0;
+		if (pSpace) {
+			c = new char[count * 3 - 1];
+			// First byte, then " XX" for each following byte
+			int b = pByte[i++] & BYTE_MASK;
+			c[j++] = HEX_DIGITS[b >>> 4];
+			c[j++] = HEX_DIGITS[b & RIGHT_MASK];
+			for (; i < length; i++) {
+				b = pByte[i] & BYTE_MASK;
+				c[j++] = CHAR_SPACE;
+				c[j++] = HEX_DIGITS[b >>> 4];
+				c[j++] = HEX_DIGITS[b & RIGHT_MASK];
+			}
+		} else {
+			c = new char[count * 2];
+			for (; i < length; i++) {
+				int b = pByte[i] & BYTE_MASK;
+				c[j++] = HEX_DIGITS[b >>> 4];
+				c[j++] = HEX_DIGITS[b & RIGHT_MASK];
+			}
+		}
+		return new String(c);
 	}
 
 	/**
-	 * Method to get bytes form string
+	 * Method to get bytes form string. Whitespaces (as defined by
+	 * {@link Character#isWhitespace(char)}) are ignored.
 	 *
 	 * @param pData
 	 *            String to parse
 	 * @return a table of string
+	 * @throws IllegalArgumentException
+	 *             if pData is null, contains a non hexadecimal character or has
+	 *             an odd number of hexadecimal digits
 	 */
 	public static byte[] fromString(final String pData) {
 		if (pData == null) {
 			throw new IllegalArgumentException("Argument can't be null");
 		}
-		StringBuilder sb = new StringBuilder(pData);
+		final char[] chars = pData.toCharArray();
+		final int length = chars.length;
+		// Upper bound: every char is a hexa digit (shrunk below if whitespaces were skipped)
+		final byte[] result = new byte[length >> 1];
 		int j = 0;
-		for (int i = 0; i < sb.length(); i++) {
-			if (!Character.isWhitespace(sb.charAt(i))) {
-				sb.setCharAt(j++, sb.charAt(i));
+		int high = 0;
+		boolean pending = false;
+		for (int i = 0; i < length; i++) {
+			char ch = chars[i];
+			int digit = ch < HEX_DECODE_TABLE.length ? HEX_DECODE_TABLE[ch] : decodeSlow(ch);
+			if (digit < 0) {
+				if (digit == WHITESPACE) {
+					continue;
+				}
+				throw new IllegalArgumentException("Invalid hexadecimal character '" + ch + "' at index " + i + " :" + pData);
+			}
+			if (pending) {
+				result[j++] = (byte) ((high << 4) + digit);
+				pending = false;
+			} else {
+				high = digit;
+				pending = true;
 			}
 		}
-		sb.delete(j, sb.length());
-		if (sb.length() % 2 != 0) {
+		if (pending) {
 			throw new IllegalArgumentException("Hex binary needs to be even-length :" + pData);
 		}
-		byte[] result = new byte[sb.length() / 2];
-		j = 0;
-		for (int i = 0; i < sb.length(); i += 2) {
-			result[j++] = (byte) ((Character.digit(sb.charAt(i), 16) << 4) + Character.digit(sb.charAt(i + 1), 16));
-		}
-		return result;
+		return j == result.length ? result : Arrays.copyOf(result, j);
+	}
+
+	/**
+	 * Decode a non ASCII char (same semantic as {@link Character#isWhitespace(char)}
+	 * and {@link Character#digit(char, int)}, which returns -1 for invalid digits)
+	 *
+	 * @param pChar
+	 *            the char to decode
+	 * @return {@link #WHITESPACE} if the char is a whitespace, the hexa digit value otherwise
+	 */
+	private static int decodeSlow(final char pChar) {
+		return Character.isWhitespace(pChar) ? WHITESPACE : Character.digit(pChar, HEXA);
 	}
 
 	/**
@@ -264,13 +310,11 @@ public final class BytesUtils {
 		if (pBitIndex < 0 || pBitIndex > 7) {
 			throw new IllegalArgumentException("parameter 'pBitIndex' must be between 0 and 7. pBitIndex=" + pBitIndex);
 		}
-		byte ret = pData;
 		if (pOn) { // Set bit
-			ret |= 1 << pBitIndex;
-		} else { // Unset bit
-			ret &= ~(1 << pBitIndex);
+			return (byte) (pData | 1 << pBitIndex);
 		}
-		return ret;
+		// Unset bit
+		return (byte) (pData & ~(1 << pBitIndex));
 	}
 
 	/**
@@ -281,17 +325,17 @@ public final class BytesUtils {
 	 * @return a binary representation of the byte array
 	 */
 	public static String toBinary(final byte[] pBytes) {
-		String ret = null;
-		if (pBytes != null && pBytes.length > 0) {
-			StringBuilder build = new StringBuilder(pBytes.length * BitUtils.BYTE_SIZE);
-			for (byte b : pBytes) {
-				for (int i = 7; i >= 0; i--) {
-					build.append((b >> i) & 1);
-				}
-			}
-			ret = build.toString();
+		if (pBytes == null || pBytes.length == 0) {
+			return null;
 		}
-		return ret;
+		final char[] c = new char[pBytes.length * BitUtils.BYTE_SIZE];
+		int j = 0;
+		for (byte b : pBytes) {
+			for (int i = 7; i >= 0; i--) {
+				c[j++] = (char) (CHAR_DIGIT_ZERO + (b >> i & 1));
+			}
+		}
+		return new String(c);
 	}
 
 	/**
