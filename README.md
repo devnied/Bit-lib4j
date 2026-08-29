@@ -32,6 +32,7 @@ It is very easy to get started with bit-lib4j:
 ```java
 	BitUtils bit = new BitUtils(4);
 	bit.setNextInteger(-2 , 4);	    // set an integer (-2) on 4 bits
+	bit.reset();                    // back to the first bit
 
 	// Result
 	bit.getNextIntegerSigned(4);    // return -2
@@ -68,6 +69,11 @@ If you are not using Maven or some other dependency management tool that can und
 
 **Runtime Dependencies**
 * slf4j-api 1.7.36
+
+## Release notes
+
+See [CHANGELOG.md](CHANGELOG.md) for the changes of each version (1.7.0 changes
+some behaviours of 1.6.0, read it before upgrading).
 
 ## Bugs
 

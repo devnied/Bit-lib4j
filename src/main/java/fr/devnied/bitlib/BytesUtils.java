@@ -223,7 +223,11 @@ public final class BytesUtils {
 
 	/**
 	 * Method to get bytes form string. Whitespaces (as defined by
-	 * {@link Character#isWhitespace(char)}) are ignored.
+	 * {@link Character#isWhitespace(char)}) are ignored. Digits are decoded
+	 * with the semantic of {@link Character#digit(char, int)} in base 16: besides
+	 * 0-9, A-F and a-f, the non ASCII decimal digits and the full width letters are
+	 * accepted. Error messages never echo the input: only the offending
+	 * character, its index and the length of the input.
 	 *
 	 * @param pData
 	 *            String to parse
@@ -250,7 +254,8 @@ public final class BytesUtils {
 				if (digit == WHITESPACE) {
 					continue;
 				}
-				throw new IllegalArgumentException("Invalid hexadecimal character '" + ch + "' at index " + i + " :" + pData);
+				throw new IllegalArgumentException("Invalid hexadecimal character '" + ch + "' at index " + i + " (input length "
+						+ length + ")");
 			}
 			if (pending) {
 				result[j++] = (byte) ((high << 4) + digit);
@@ -261,7 +266,8 @@ public final class BytesUtils {
 			}
 		}
 		if (pending) {
-			throw new IllegalArgumentException("Hex binary needs to be even-length :" + pData);
+			throw new IllegalArgumentException("Hex binary needs to be even-length: " + (2 * j + 1) + " hexadecimal digits (input length "
+					+ length + ")");
 		}
 		return j == result.length ? result : Arrays.copyOf(result, j);
 	}
