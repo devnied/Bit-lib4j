@@ -581,14 +581,26 @@ public final class BitUtils {
 		long finalValue = 0;
 		int index = currentBitIndex;
 		int remaining = pLength;
-		while (remaining > 0) {
-			int mod = index & BIT_MASK;
-			int available = BYTE_SIZE - mod;
-			int take = remaining < available ? remaining : available;
-			int chunk = (byteTab[index >> BYTE_SHIFT] & DEFAULT_VALUE) >>> available - take & (1 << take) - 1;
-			finalValue = finalValue << take | chunk;
+		final int mod = index & BIT_MASK;
+		if (mod != 0 && remaining > 0) {
+			// Partial first byte (nothing is read for a zero length)
+			final int available = BYTE_SIZE - mod;
+			final int take = remaining < available ? remaining : available;
+			finalValue = (byteTab[index >> BYTE_SHIFT] & DEFAULT_VALUE) >>> available - take & (1 << take) - 1;
 			remaining -= take;
 			index += take;
+		}
+		// Whole bytes: no masking needed
+		int k = index >> BYTE_SHIFT;
+		while (remaining >= BYTE_SIZE) {
+			finalValue = finalValue << BYTE_SIZE | byteTab[k++] & DEFAULT_VALUE;
+			remaining -= BYTE_SIZE;
+			index += BYTE_SIZE;
+		}
+		// Partial last byte
+		if (remaining > 0) {
+			finalValue = finalValue << remaining | (byteTab[k] & DEFAULT_VALUE) >>> BYTE_SIZE - remaining;
+			index += remaining;
 		}
 		currentBitIndex = index;
 		return finalValue;
@@ -790,30 +802,22 @@ public final class BitUtils {
 	public void setNextByte(final byte[] pValue, final int pLength, final boolean pPadBefore) {
 		checkRange(pLength);
 		final int totalSize = (pLength + BYTE_SIZE - 1) / BYTE_SIZE;
-		final byte[] src;
-		if (pValue.length >= totalSize) {
-			// No padding needed: read directly from the input (only the first
-			// totalSize bytes are used)
-			src = pValue;
-		} else {
-			src = new byte[totalSize];
+		if (pValue.length < totalSize) {
+			// Shorter value: the field is the value plus zeros, written as two
+			// consecutive fields (no padded copy, no shift loop)
+			final int valueBits = pValue.length << BYTE_SHIFT;
 			if (pPadBefore) {
-				System.arraycopy(pValue, 0, src, totalSize - pValue.length, pValue.length);
-				final int rem = pLength & BIT_MASK;
-				if (rem != 0) {
-					// Right-align the value on the pLength bits of the field (not
-					// on the byte boundary): shift it left so that its last bit
-					// lands on the last bit of the field
-					final int shift = BYTE_SIZE - rem;
-					for (int i = 0; i < totalSize - 1; i++) {
-						src[i] = (byte) (src[i] << shift | (src[i + 1] & DEFAULT_VALUE) >>> rem);
-					}
-					src[totalSize - 1] = (byte) (src[totalSize - 1] << shift);
-				}
+				resetNextBits(pLength - valueBits);
+				setNextByte(pValue, valueBits, true);
 			} else {
-				System.arraycopy(pValue, 0, src, 0, pValue.length);
+				setNextByte(pValue, valueBits, true);
+				resetNextBits(pLength - valueBits);
 			}
+			return;
 		}
+		// No padding needed: write directly from the input (only the first
+		// totalSize bytes are used)
+		final byte[] src = pValue;
 		final int start = currentBitIndex;
 		final int mod = start & BIT_MASK;
 		int k = start >> BYTE_SHIFT;
@@ -830,33 +834,55 @@ public final class BitUtils {
 				byteTab[last] = (byte) (byteTab[last] & ~m | src[totalSize - 1] & m);
 			}
 		} else {
-			final int end = start + pLength;
-			final int leftShift = BYTE_SIZE - mod;
-			// Bits to keep in byteTab[k] / byteTab[k + 1] when a full source byte
-			// is written over them (positions [mod, 8) / [0, mod) are overwritten)
-			final int keepHigh = ~(DEFAULT_VALUE >>> mod);
-			final int keepLow = ~(DEFAULT_VALUE << leftShift);
-			for (int i = 0; i < totalSize; i++, k++) {
-				int val = src[i] & DEFAULT_VALUE;
-				int bits = end - (k << BYTE_SHIFT) - mod;
-				if (bits >= BYTE_SIZE) {
-					byteTab[k] = (byte) (byteTab[k] & keepHigh | val >>> mod);
-					byteTab[k + 1] = (byte) (byteTab[k + 1] & keepLow | val << leftShift);
-				} else {
-					// Last byte: keep only the top 'bits' bits, overwrite the
-					// field positions [mod, mod + hi) of byteTab[k] and [0, lo) of
-					// byteTab[k + 1] and keep the others
-					val &= DEFAULT_VALUE << BYTE_SIZE - bits;
-					final int hi = Math.min(bits, leftShift);
-					byteTab[k] = (byte) (byteTab[k] & ~mask(mod, hi) | val >>> mod);
-					if (bits > leftShift) {
-						final int lo = bits - leftShift;
-						byteTab[k + 1] = (byte) (byteTab[k + 1] & ~mask(0, lo) | val << leftShift);
-					}
-				}
-			}
+			writeUnaligned(src, totalSize, start, pLength);
 		}
 		currentBitIndex = start + pLength;
+	}
+
+	/**
+	 * Unaligned write of the pLength first bits of pSrc at the bit pStart.<br>
+	 * Each destination byte is a sliding window over two consecutive source
+	 * bytes: the first and the last one are partial (read-modify-write to keep
+	 * the bits outside the field), the ones in between are entirely inside the
+	 * field and are simply stored.
+	 *
+	 * @param pSrc
+	 *            the bytes to write
+	 * @param pTotalSize
+	 *            the number of bytes of pSrc covered by the field
+	 * @param pStart
+	 *            start bit index (not byte aligned)
+	 * @param pLength
+	 *            the length of the field in bits
+	 */
+	private void writeUnaligned(final byte[] pSrc, final int pTotalSize, final int pStart, final int pLength) {
+		if (pLength == 0) {
+			return;
+		}
+		final int mod = pStart & BIT_MASK;
+		final int leftShift = BYTE_SIZE - mod;
+		final int k = pStart >> BYTE_SHIFT;
+		final int lastDest = mod + pLength - 1 >> BYTE_SHIFT;
+		final int lastBits = (mod + pLength - 1 & BIT_MASK) + 1;
+		int cur = pSrc[0] & DEFAULT_VALUE;
+		int m = DEFAULT_VALUE >>> mod;
+		if (lastDest == 0) {
+			// The whole field is inside one destination byte
+			m &= DEFAULT_VALUE << BYTE_SIZE - lastBits;
+			byteTab[k] = (byte) (byteTab[k] & ~m | cur >>> mod & m);
+			return;
+		}
+		byteTab[k] = (byte) (byteTab[k] & ~m | cur >>> mod);
+		int prev = cur;
+		int d = 1;
+		for (; d < lastDest; d++) {
+			cur = pSrc[d] & DEFAULT_VALUE;
+			byteTab[k + d] = (byte) (prev << leftShift | cur >>> mod);
+			prev = cur;
+		}
+		cur = d < pTotalSize ? pSrc[d] & DEFAULT_VALUE : 0;
+		m = DEFAULT_VALUE << BYTE_SIZE - lastBits;
+		byteTab[k + d] = (byte) (byteTab[k + d] & ~m | (prev << leftShift | cur >>> mod) & m);
 	}
 
 	/**
@@ -988,8 +1014,13 @@ public final class BitUtils {
 			int k = index >> BYTE_SHIFT;
 			// Overwrite the field bits (positions [mod, mod + written)) and keep
 			// the others
-			int m = mask(mod, written);
-			byteTab[k] = (byte) (byteTab[k] & ~m | bits & m);
+			if (written == BYTE_SIZE) {
+				byteTab[k] = (byte) bits;
+			} else {
+				// mod + written <= 8: both shifts stay within [0, 8)
+				int m = DEFAULT_VALUE >>> mod & DEFAULT_VALUE << BYTE_SIZE - mod - written;
+				byteTab[k] = (byte) (byteTab[k] & ~m | bits & m);
+			}
 			writeSize -= written;
 			index += written;
 		}

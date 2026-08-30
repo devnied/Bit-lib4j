@@ -8,12 +8,15 @@ Binary compatible with 1.6.0. The bytes produced or parsed can differ: check
 *Changed* when upgrading.
 
 ### Performance
-- Reading and writing long fields is 4x to 13x faster (64 bytes at an unaligned
-  index: 28 ns).
+- Reading and writing long fields is 5x to 26x faster (64 bytes at an unaligned
+  index: 14 ns).
+- Integer and long fields are read about 5x faster (`getNextLong(64)`: 2.9 ns).
 - Hexa strings and byte conversions are about 4x faster.
 - Dates are twice as fast to read and four times as fast to write, through a
   per-thread formatter cache.
-- Small writes cost about 0.6 ns more, in exchange for the guarantees below.
+- Writing a value shorter than its field no longer allocates.
+- Writing a small integer field costs about 0.6 ns more, in exchange for the
+  guarantees below.
 
 ### Fixed
 - A field can be written anywhere in the buffer without disturbing its
