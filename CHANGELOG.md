@@ -2,7 +2,7 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.7.0] - Unreleased
+## [1.7.0] - 2026-08-30
 
 Binary compatible with 1.6.0. The bytes produced or parsed can differ: check
 *Changed* when upgrading.
@@ -49,4 +49,4 @@ Binary compatible with 1.6.0. The bytes produced or parsed can differ: check
 
 See the [GitHub releases](https://github.com/devnied/Bit-lib4j/releases).
 
-[1.7.0]: https://github.com/devnied/Bit-lib4j/compare/bit-lib4j-1.6.0...master
+[1.7.0]: https://github.com/devnied/Bit-lib4j/compare/bit-lib4j-1.6.0...bit-lib4j-1.7.0
