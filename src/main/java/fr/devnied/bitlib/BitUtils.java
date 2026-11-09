@@ -6,11 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Class to manage bit with java.<br>
@@ -221,12 +217,18 @@ public final class BitUtils {
 	 * This method is used to get a mask dynamically
 	 *
 	 * @param pIndex
-	 *            start index of the mask
+	 *            start index of the mask (0 to 7, bit 0 being the most
+	 *            significant bit)
 	 * @param pLength
 	 *            size of mask
-	 * @return the mask in byte
+	 * @return the mask in byte (0 when pIndex is not a bit index of a byte)
 	 */
 	public byte getMask(final int pIndex, final int pLength) {
+		if ((pIndex & ~BIT_MASK) != 0) {
+			// Not within [0, 7]: no bit of the byte is selected (a shift by 32
+			// or more would wrap and select bits again)
+			return 0;
+		}
 		return (byte) mask(pIndex, pLength);
 	}
 
@@ -331,18 +333,27 @@ public final class BitUtils {
 		final int mod = pStart & BIT_MASK;
 		final int rightShift = BYTE_SIZE - mod;
 		final int nbBytes = pTab.length;
+		final int last = nbBytes - 1;
 		int k = pStart >> BYTE_SHIFT;
-		for (int i = 0; i < nbBytes; i++, k++) {
-			int val = (byteTab[k] & DEFAULT_VALUE) << mod;
-			if ((k + 1) << BYTE_SHIFT < end) {
-				val |= (byteTab[k + 1] & DEFAULT_VALUE) >>> rightShift;
-			}
-			pTab[i] = (byte) val;
+		int cur = byteTab[k] & DEFAULT_VALUE;
+		// All the output bytes but the last one: the next source byte always
+		// exists and each source byte is loaded once
+		for (int i = 0; i < last; i++) {
+			final int next = byteTab[++k] & DEFAULT_VALUE;
+			pTab[i] = (byte) (cur << mod | next >>> rightShift);
+			cur = next;
+		}
+		// Last output byte: the next source byte is read only if the field
+		// reaches it, then the bits after the field are cleared
+		int val = cur << mod;
+		if ((k + 1) << BYTE_SHIFT < end) {
+			val |= (byteTab[k + 1] & DEFAULT_VALUE) >>> rightShift;
 		}
 		final int rem = pSize & BIT_MASK;
 		if (rem != 0) {
-			pTab[nbBytes - 1] &= DEFAULT_VALUE << BYTE_SIZE - rem;
+			val &= DEFAULT_VALUE << BYTE_SIZE - rem;
 		}
+		pTab[last] = (byte) val;
 	}
 
 	/**
@@ -429,7 +440,8 @@ public final class BitUtils {
 	 * stack trace at debug level only). Reading 0 bit returns null without
 	 * logging. The parser is a {@link SimpleDateFormat} kept per thread and per
 	 * pattern: it is lenient and uses the default time zone and locale of the
-	 * thread at its first use with the pattern.
+	 * thread at its first use with the pattern (a zone name found in a text
+	 * applies to that text only).
 	 *
 	 * @param pSize
 	 *            the size of the string date in bit
@@ -459,12 +471,19 @@ public final class BitUtils {
 			// Nothing read (pSize == 0): no date and no parsing error to report
 			return null;
 		}
+		final TimeZone zone = sdf.getTimeZone();
 		try {
 			return sdf.parse(dateTxt);
 		} catch (ParseException e) {
 			LOGGER.warn("Parsing date error. date:{} pattern:{}", dateTxt, pPattern);
 			LOGGER.debug("Parsing date error", e);
 			return null;
+		} finally {
+			// Parsing a zone name replaces the zone of the formatter, which is
+			// cached: put it back for the next dates
+			if (sdf.getTimeZone() != zone) {
+				sdf.setTimeZone(zone);
+			}
 		}
 	}
 
@@ -527,13 +546,12 @@ public final class BitUtils {
 		if (pLength > Long.SIZE) {
 			throw new IllegalArgumentException("Long overflow with length > 64");
 		}
-		long decimal = getNextLong(pLength);
-		long signMask = 1L << pLength - 1;
-
-		if ( (decimal & signMask) != 0) {
-			return - (signMask - (signMask ^ decimal));
-		}
-		return decimal;
+		final long decimal = getNextLong(pLength);
+		// Sign extension: the sign bit of the field is moved to the sign bit of
+		// the long and back (shift counts are taken modulo 64, so nothing moves
+		// for a length of 0 or 64)
+		final int shift = Long.SIZE - pLength;
+		return decimal << shift >> shift;
 	}
 
 	/**

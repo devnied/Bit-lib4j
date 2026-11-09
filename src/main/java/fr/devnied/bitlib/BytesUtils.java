@@ -97,7 +97,9 @@ public final class BytesUtils {
 		if (length <= 0 || length > 4) {
 			throw new IllegalArgumentException("Length must be between 1 and 4. Length = " + length);
 		}
-		if (startPos < 0 || byteArray.length < startPos + length) {
+		// startPos > byteArray.length - length <=> startPos + length > byteArray.length,
+		// without int overflow when startPos is close to Integer.MAX_VALUE
+		if (startPos < 0 || startPos > byteArray.length - length) {
 			throw new IllegalArgumentException("Length or startPos not valid");
 		}
 		int value = 0;

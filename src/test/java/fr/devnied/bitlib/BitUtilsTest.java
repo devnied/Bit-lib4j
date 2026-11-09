@@ -8,11 +8,7 @@ import org.junit.function.ThrowingRunnable;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -2479,5 +2475,69 @@ public final class BitUtilsTest {
 			return;
 		}
 		Assert.assertThrows(IllegalArgumentException.class, () -> new BitUtils(tooLarge));
+	}
+
+	/**
+	 * A date formatter is kept per thread and per pattern: the zone found in a
+	 * text which has been read must not be used for the next dates written or
+	 * read with the same pattern
+	 */
+	@Test
+	public void testDateParsedTimeZoneDoesNotLeak() throws ParseException {
+		final TimeZone defaultZone = TimeZone.getDefault();
+		final Locale defaultLocale = Locale.getDefault();
+		try {
+			TimeZone.setDefault(TimeZone.getTimeZone("Europe/Paris"));
+			Locale.setDefault(Locale.US);
+			final String pattern = "yyyyMMddHHmm z";
+			final Date date = new SimpleDateFormat("yyyyMMddHHmm").parse("202601011200");
+			final String local = new SimpleDateFormat(pattern).format(date);
+			final SimpleDateFormat foreignFormat = new SimpleDateFormat(pattern);
+			foreignFormat.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"));
+			final String foreign = foreignFormat.format(date);
+			Assertions.assertThat(foreign).isNotEqualTo(local);
+
+			BitUtils bit = new BitUtils(local.length() * 8);
+			bit.setNextDate(date, pattern);
+			Assertions.assertThat(new String(bit.getData(), StandardCharsets.US_ASCII)).isEqualTo(local);
+
+			// A date expressed in another zone is read...
+			bit = new BitUtils(foreign.getBytes(StandardCharsets.US_ASCII));
+			Assertions.assertThat(bit.getNextDate(foreign.length() * 8, pattern)).isEqualTo(date);
+
+			// ... and the next date is still written in the default zone
+			bit = new BitUtils(local.length() * 8);
+			bit.setNextDate(date, pattern);
+			Assertions.assertThat(new String(bit.getData(), StandardCharsets.US_ASCII)).isEqualTo(local);
+
+			// Same thing when the text is rejected after its zone has been read
+			final String zoneFirst = "z yyyyMMddHHmm";
+			final String localZoneFirst = new SimpleDateFormat(zoneFirst).format(date);
+			final String invalid = foreign.substring(foreign.indexOf(' ') + 1) + " 2026XX";
+			bit = new BitUtils(invalid.getBytes(StandardCharsets.US_ASCII));
+			Assertions.assertThat(bit.getNextDate(invalid.length() * 8, zoneFirst)).isNull();
+			bit = new BitUtils(localZoneFirst.length() * 8);
+			bit.setNextDate(date, zoneFirst);
+			Assertions.assertThat(new String(bit.getData(), StandardCharsets.US_ASCII)).isEqualTo(localZoneFirst);
+		} finally {
+			TimeZone.setDefault(defaultZone);
+			Locale.setDefault(defaultLocale);
+		}
+	}
+
+	/**
+	 * getMask: an index which is not a bit index of a byte (0 to 7) selects no
+	 * bit, whatever the length
+	 */
+	@Test
+	public void testMaskIndexOutOfByte() {
+		final BitUtils bit = new BitUtils(8);
+		final int[] indexes = { 8, 9, 31, 32, 33, 39, 64, -1, -8, -32, -33, Integer.MAX_VALUE, Integer.MIN_VALUE };
+		final int[] lengths = { 0, 1, 3, 8, 32, Integer.MAX_VALUE };
+		for (int index : indexes) {
+			for (int length : lengths) {
+				Assertions.assertThat(bit.getMask(index, length)).isEqualTo((byte) 0x00);
+			}
+		}
 	}
 }

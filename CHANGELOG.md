@@ -2,6 +2,18 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Performance
+- Unaligned byte and string reads are 10% to 35% faster.
+
+### Fixed
+- Reading a date with a zone name no longer changes the zone of the next dates
+  read or written with the same pattern.
+- `getMask` returns 0 for any index outside a byte.
+- `byteArrayToInt` rejects any out-of-range start position with an
+  `IllegalArgumentException`.
+
 ## [1.7.0] - 2026-08-30
 
 Binary compatible with 1.6.0. The bytes produced or parsed can differ: check

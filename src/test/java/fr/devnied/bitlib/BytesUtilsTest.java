@@ -480,4 +480,16 @@ public final class BytesUtilsTest {
 		Assertions.assertThat(e.getMessage()).contains("even-length").contains("9 hexadecimal digits");
 		Assertions.assertThat(e.getMessage().contains("4111")).isFalse();
 	}
+
+	/**
+	 * byteArrayToInt: a start position close to Integer.MAX_VALUE is rejected
+	 * like any other invalid position (no int overflow in the bounds check)
+	 */
+	@Test
+	public void testByteArrayToIntStartPosOverflow() {
+		final byte[] tab = { 0x01, 0x02, 0x03, 0x04 };
+		Assert.assertThrows(IllegalArgumentException.class, () -> BytesUtils.byteArrayToInt(tab, Integer.MAX_VALUE, 4));
+		Assert.assertThrows(IllegalArgumentException.class, () -> BytesUtils.byteArrayToInt(tab, Integer.MAX_VALUE, 1));
+		Assert.assertThrows(IllegalArgumentException.class, () -> BytesUtils.byteArrayToInt(tab, Integer.MAX_VALUE - 2, 3));
+	}
 }
